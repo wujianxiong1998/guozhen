@@ -1,0 +1,335 @@
+.normal{
+    width: 100%;
+    height: 100%;
+    min-width: 800px;
+    overflow: hidden;
+    background-color: #fff;
+    position: relative;
+     box-shadow: 0px 0px 4px 0px rgba(165,187,224,1);
+        -webkit-box-shadow: 0px 0px 4px 0px #a5bbe0;
+        border-radius: 3px;
+        font-size: 14px;
+    .normal_body{
+      
+        display: inline-block;
+        position: relative;
+        height: 100%;
+        width: e('calc(100% - 2px)');
+        margin-bottom: 1px;
+        vertical-align: top;
+         padding-top: 30px;
+        margin-left:1px;
+        margin-right: 1px;
+        .backLine{
+            position: fixed;
+            top: 0;
+            right: 15px;
+            left: 10px;
+            height: 30px;
+            font-size: 15px;
+            line-height: 30px;
+            padding-left: 15px;
+            font-weight: bold;
+            .left{
+                display: inline-block;
+                cursor: pointer;
+                i{
+                    color:#FF323C;
+                    cursor: pointer;
+                    margin-right: 5px;
+                }
+            }
+            .close{
+                position: absolute;
+                top: 0;
+                right: 0;
+                cursor: pointer;
+                
+                .anticon {
+                    width: 18px;
+                    height: 18px;
+                    background: #FF323C;
+                    border-radius: 100%;
+                    color: #fff;
+                    line-height: 18px !important;
+                    font-weight: bold;
+                    display: inline-block;
+                    font-style: normal;
+                    vertical-align: baseline;
+                    text-align: center;
+                    text-transform: none;
+                    font-size: 12px;
+                }
+
+            }
+        }
+        .splitLine{
+            width: e('calc(100% - 50px)');
+            margin: 0 auto;
+            height: 1px;
+            border-bottom: 1px solid #BBBBBB;
+        }
+        .content{
+            width: 100%;
+            margin-top: 10px;
+            height:e('calc(100% - 45px)');
+            overflow-y: auto;
+            .query{
+                width: 100%;
+                height: 45px;
+                .item{
+                    display: inline-block;
+                    width: 500px;
+                    margin-right: 20px;
+                    color:#000;
+                    .text{
+                        line-height: 28px;
+                        height: 38px;
+                        padding: 5px 0px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        text-align: right;
+                    }
+                    .gridlists {
+                        width: 100%;
+                        -webkit-box-sizing: border-box;
+                        box-sizing: border-box;
+                        padding-left: 15px;
+                        padding-top: 5px;
+                        padding-bottom: 5px;
+                        position: relative;
+                        line-height: 28px;
+                        height: 38px;
+                    }
+                }
+                .btn{
+                     display: inline-block;
+                     line-height: 28px;
+                        height: 38px;
+                        padding: 5px 0px;
+                        vertical-align: top;
+                        button{
+                            background:rgba(92,142,255,1);
+                            border-radius:2px 2px 2px 2px;
+                            border:rgba(92,142,255,1);
+                        }
+                }
+                
+            }
+            .contentBox{
+                width:700px;
+                background:#fff;
+                box-shadow:0px 0px 5px 0px rgba(0, 0, 0, 0.28);
+                margin: 20px auto;
+                padding: 15px;
+                color:#000;
+                line-height: 40px;
+                font-size: 17px;
+                font-family: 'Microsoft YaHei';
+                .title{
+                    width: 100%;
+                    font-size: 19px;
+                    font-weight: bold;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: center;
+                }
+                .infoLine{
+                    width: 100%;
+                    color:#5F5F5F;
+                    
+                    display: flex;
+                    .item{
+                        display: inline-block;
+                        flex-grow: 1;
+                        text-align: center;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+                }
+                .article{
+                    width: 100%;
+                   height: 500px;
+                }
+                .btnContainer{
+                    width: 100%;
+                    text-align: center;
+                    button{
+                        background:rgba(250,250,250,1);
+border:1px solid rgba(229, 229, 229, 1);
+border-radius:2px;
+                    }
+                }
+            }
+            .inputContainer{
+                 width:700px;
+                background:#fff;
+                box-shadow:0px 0px 5px 0px rgba(0, 0, 0, 0.28);
+                margin: 20px auto;
+                padding: 15px;
+                .title{
+                    width: 100%;
+                    height: 30px;
+                    line-height: 30px;
+                    font-weight: bold;
+                }
+                .btn{
+                    width: 100%;
+                    height: 40px;
+                    padding-top: 10px;
+                    text-align: right;
+                    button{
+                        background:rgba(250,250,250,1);
+                    border:1px solid rgba(229, 229, 229, 1);
+                    border-radius:2px;
+                    }
+                }
+            }
+            .comments{
+                 width:700px;
+                 margin: 20px auto;
+                 .commentItem{
+                    border-bottom: 1px solid #bbbbbb;
+                    width:100%;
+                    .icon{
+                        display: inline-block;
+                        width: 50px;
+                        vertical-align: top;
+                        line-height: 50px;
+                        text-align: center;
+                        img{
+                            width: 40px;
+                            height: 40px;
+                            margin-top: 10px;
+                            border-radius: 100%;
+                        }
+                    }
+                    .centerPart{
+                        display: inline-block;
+                        width: 130px;
+                        vertical-align: top;
+                        .name{
+                            width: 100%;
+                            height: 25px;
+                            line-height: 25px;
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            font-size: 18px;
+                            color: #3996FF;
+                        }
+                        .occupation{
+                            width: 100%;
+                            height: 20px;
+                            line-height: 20px;
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            font-size: 13px;
+                            color: #848484;
+                        }
+                        .time{
+                            width: 100%;
+                            height: 20px;
+                            line-height: 20px;
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            font-size: 13px;
+                            color: #848484;
+                        }
+                    }
+                    .content{
+                        display: inline-block;
+                        width: e('calc(100% - 180px)');
+                        vertical-align: top;
+                        padding-left: 5px;
+                        color: #252424;
+                        font-size: 15px;
+                    }
+                 }
+            }
+        }
+    }
+}
+
+.answerItem{
+    width: 100%;
+    line-height: 28px;
+        padding-top: 10px;
+    padding-bottom: 10px;
+        margin-bottom: 10px;
+    background: #f8f9fd;
+    .avatar{
+        display: inline-block;
+         vertical-align: top;
+        width: 84px;
+        text-align: right;
+        img{
+            height: 60px;
+            width: 60px;
+            border-radius: 100%;
+        }
+    }
+    .text{
+        vertical-align: top;
+        display: inline-block;
+        width: e('calc(100% - 84px)');
+        padding: 0 10px;
+        .infoLine{
+            width: 100%;
+            height: 50px;
+            margin-bottom: 10px;
+            button{
+                border:none !important;
+            }
+            .left{
+                vertical-align: top;
+                display: inline-block;
+                width: 80%;
+                .name{
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    line-height: 30px;
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+                .date{
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    line-height: 20px;
+                    font-size: 12px;
+                }   
+            }
+            .right{
+                vertical-align: top;
+                display: inline-block;
+                width: 20%;
+                text-align: right;
+                line-height: 50px;
+                .acceptContent{
+                    background: #63b663;
+                    color:#fff;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-size: 15px;
+                    i{
+                        color:#fff;
+                    }
+                }
+            }
+            
+        }
+        .content{
+            width: 100%;
+
+        }
+    }
+}

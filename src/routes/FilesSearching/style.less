@@ -1,0 +1,105 @@
+.handle_box {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    top: 48px;
+    padding: 5px 5px 5px 63px;
+    border-bottom: 1px solid #d9d9d9;
+    font-size: 16px;
+    height: 130px;
+    Button {
+        margin-right: 20px;
+    }
+    .sel {
+        margin-top: 12px;
+    }
+    .sel2 {
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+    .radio {
+        display: inline-block;
+        :global {
+            .ant-radio-group {
+                font-size: 16px
+            }
+        }
+        :global {
+            .ant-checkbox-group {
+                display: inline-block;
+                font-size: 16px;
+            }
+            .ant-checkbox-wrapper {
+                font-size: 16px;
+            }
+        }
+    }
+}
+.handle_bottom {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    top: 178px;
+}
+.singleLine{
+    width: e('calc(100% - 30px)');
+    margin: 0 15px;
+    border-bottom: 1px solid #c3c3c3;
+    padding-left: 15px;
+    .title{
+        width: 100%;
+        font-size: 18px;
+        font-weight: bold;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        height: 30px;
+        line-height: 30px;
+       
+        padding-left: 5px;
+        .text{
+             cursor: pointer;
+             text-decoration: underline;
+        }
+        .text:hover{
+            color:#108eff;
+        }
+    }
+
+    .infoLine{
+         width: 100%;
+        text-decoration: underline;
+          overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        height: 40px;
+        line-height: 40px;
+        font-size: 15px;
+        .item{
+            display: inline-block;
+            vertical-align: top;
+            padding: 0 5px;
+        }
+        .splitLine{
+             display: inline-block;
+            vertical-align: top;
+            height: 15px;
+            margin-top: 12px;
+            width: 1px;
+            border-right: 1px solid #c3c3c3;
+        }
+    }
+}
+.listContainer{
+    overflow-y: auto;
+}
+ .pagination{
+            width: 100%;
+            height: 40px;
+            text-align: center;
+        }
+// .ant-checkbox-group

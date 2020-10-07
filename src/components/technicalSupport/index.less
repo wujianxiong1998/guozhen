@@ -1,0 +1,89 @@
+.viewContainer{
+    :global(.vtx-ui-modallist-list-right-text){
+        width: 100%;
+    }
+}
+.answerItem{
+    width: 100%;
+    line-height: 28px;
+        padding-top: 10px;
+    padding-bottom: 10px;
+        margin-bottom: 10px;
+    background: #f8f9fd;
+    .avatar{
+        display: inline-block;
+         vertical-align: top;
+        width: 84px;
+        text-align: right;
+        img{
+            height: 60px;
+            width: 60px;
+            border-radius: 100%;
+        }
+    }
+    .text{
+        vertical-align: top;
+        display: inline-block;
+        width: e('calc(100% - 84px)');
+        padding: 0 10px;
+        .infoLine{
+            width: 100%;
+            height: 50px;
+            margin-bottom: 10px;
+            button{
+                border:none !important;
+            }
+            .left{
+                vertical-align: top;
+                display: inline-block;
+                width: 80%;
+                .name{
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    line-height: 30px;
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+                .date{
+                    width: 100%;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    line-height: 20px;
+                    font-size: 12px;
+                }   
+            }
+            .right{
+                vertical-align: top;
+                display: inline-block;
+                width: 20%;
+                text-align: right;
+                line-height: 50px;
+                .acceptContent{
+                    background: #63b663;
+                    color:#fff;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-size: 15px;
+                    i{
+                        color:#fff;
+                    }
+                }
+                .unAcceptContent{
+                    background: grey;
+                    color:#fff;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-size: 15px;
+                }
+            }
+            
+        }
+        .content{
+            width: 100%;
+
+        }
+    }
+}

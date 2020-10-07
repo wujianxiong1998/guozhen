@@ -1,0 +1,66 @@
+.normal{
+    width: 100%;
+    // overflow-y: scroll;
+    // .normal_body{
+    //     display: inline-block;
+    //     position: relative;
+    //     width: 100%;
+    //     vertical-align: top;
+    //     padding-top: 10px;
+    // }
+}
+.chartContainer{
+    width: 100%;
+    padding-top: 10px;
+    min-width: 930px;
+    .chartBox{
+        display: inline-block;
+        width: e('calc(50% - 15px)');
+        min-width: 450px;
+        height: 500px;
+        padding: 10px 0 10px 10px;
+        box-sizing: content-box;
+        vertical-align: top;
+        .bigChart{
+            height:100%;
+            width: 100%;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 1px 18px rgba(0,0,0,.2);
+            overflow: hidden;
+        }
+    }
+    .headerContainer{
+        width: 100%;
+        padding: 10px;
+        .title{
+            vertical-align: top;
+            display: inline-block;
+            width: 40%;
+            font-weight: bold;
+            color: #000;
+            font-size: 15px;
+        }
+        .select{
+            vertical-align: top;
+            display: inline-block;
+            width: 60%;
+            text-align: right;
+            .singleLine{
+                margin-bottom: 5px;
+                width: 100%;
+                .splitContainer{
+                    width: 10%;
+                    text-align: center;
+                    display: inline-block;
+                    font-size: 20px;
+                }
+            }
+
+        }
+    }
+    .chart{
+        width: 100%;
+        padding: 20px;
+    }
+}

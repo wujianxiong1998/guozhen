@@ -1,0 +1,74 @@
+.main_page1 {
+    width: 100%;
+    height: 100%;
+    :global {
+        .vtx-ui-grid-normal {
+            top: 200px;
+        }
+    }
+    .handle_box {
+        position: absolute;
+        top: 48px;
+        padding: 5px 5px 5px 10px;
+        Button {
+            margin-right: 20px;
+        }
+    }
+    .table-wrapper {
+        height: e('calc(100% - 38px)');
+    }
+    .baseInfo {
+        .ant-input-number {
+            margin: 0 4px !important
+        }
+    }
+}
+.top {
+    display: flex;
+    justify-content: space-around;
+    height: 200px;
+    border-bottom: 1px solid #d9d9d9;
+    .threePart {
+        display: flex;
+        align-items: center;
+        .text {
+            display: inline-block;
+            margin-left: 8px;
+            .textInfo {
+                font-size: 20px;
+            }
+        }
+    }
+    .threeT {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        .partT {
+            margin-top: 20px;
+            .text {
+                display: inline-block;
+                margin-left: 8px;
+                .textInfo1 {
+                    font-size: 20px;
+                }
+            }
+        }
+    }
+    
+}
+.tableBox {
+    // margin-top:50px;
+    .chartsFonts {
+        padding-left: 20px;
+        &:before {
+            content: '';
+            width: 4px;
+            display: inline-block;
+            height: 16px;
+            margin-right: 6px;
+            position: relative;
+            top: 3px;
+            background-color: #3dbd7d;
+        }
+    }
+}
