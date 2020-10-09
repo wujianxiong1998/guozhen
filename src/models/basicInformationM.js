@@ -11,6 +11,12 @@ let initQueryParams = {
     regionalCompanyId : '' // 区域公司
 };
 
+// 历史记录保存
+let modalQueryParams = {
+    factoryId: '',
+    type: ''
+}
+
 // 新增参数
 let defaultNewItem = {
     name : '', // 名称
@@ -43,6 +49,10 @@ const initState = {
     currentPage : 1, // 页码
     pageSize : 10, // 每页条数
     loading : false, // 列表是否loading
+    modalCurrentPage: 1,
+    modalLoading: false, 
+    modalPageSize: 10,
+    modalTotal: 0,
     dataSource : [], // 列表数据源
     total : 0, // 列表总条数
     selectedRowKeys : [],
@@ -248,6 +258,7 @@ export default {
         
         // 删除
         *deleteItems({ payload }, { call, put, select }) {
+            console.log('删除')
             let { ids = [] } = payload;
             const params = {
                 ids : ids.join(','),
@@ -262,20 +273,44 @@ export default {
             }
         },
 
-        // 历史查询
-        *getHistory({ payload }, { call, put, select}) {
-            const { data } = yield call(getFactoryHistory, payload)
+        *getHistory({ payload = {} }, { call, put, select }) {
+            yield put({ type : 'updateState', payload : {modalLoading : true} });
+            let {
+                modalPageSize, modalCurrentPage
+            } = yield select(({basicInformation}) => basicInformation);
+            'id' in payload ? modalQueryParams.factoryId = payload.id : ''
+            'type' in payload ? modalQueryParams.type = payload.type : ''
+        	modalCurrentPage = 'modalCurrentPage' in payload ? payload.modalCurrentPage : modalCurrentPage;
+        	modalPageSize = 'modalPageSize' in payload ? payload.modalPageSize : modalPageSize;
+            let params = {
+                ...modalQueryParams,
+                page : modalCurrentPage-1,
+                size : modalPageSize,
+            };
+            const { data } = yield call(getFactoryHistory,  VtxUtil.submitTrim(params));
+            let historyData = [], modalTotal = 0, status = false;
             if(!!data && !data.result) {
-                if('data' in data && Array.isArray(data.data)) {
-                    yield put({
-                        type : 'updateState',
-                        payload : {
-                            historyData : data.data
-                        }
-                    })
+                if('data' in data && Array.isArray(data.data.rows)) {
+                    status = true;
+                    historyData = data.data.rows.map(item => ({
+                        ...item, 
+                        key : item.id
+                    }));
+                    modalTotal = data.data.total;
                 }
             }
-        }
+            let uState = {
+                historyData,
+                modalTotal,
+                modalLoading : false
+            };
+            // 请求成功 更新传入值
+            status && (uState = {...uState, ...payload});
+            yield put({
+                type : 'updateState',
+                payload : {...uState}
+            })
+        },
     },
 
     reducers : {

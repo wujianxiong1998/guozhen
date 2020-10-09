@@ -390,7 +390,7 @@ function FactoryFile({ dispatch, factoryFile, accessControlM }) {
                
                 <div className="handle_box">
                     {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
-                    {buttonLimit['DELETE'] &&<Button icon="delete" disabled={selectedRowKeys.length == 0} onClick={deleteItems}>删除</Button>}
+                    {buttonLimit['DELETE'] &&<Button icon="delete" onClick={deleteItems}>删除</Button>}
                 </div>
                 <div className="table-content">
                     <VtxDatagrid {...vtxDatagridProps} />

@@ -1,5 +1,5 @@
 /**
- * 数据填报
+ * 排污许可证
  * author : vtx xxy
  * createTime : 2019-07-23 11:38:59
  */
@@ -9,14 +9,14 @@ import { connect } from 'dva';
 import { VtxDatagrid, VtxGrid, VtxDate, VtxExport } from 'vtx-ui';
 const { VtxMonthPicker, VtxRangePicker } = VtxDate;
 const { VtxExport2 } = VtxExport;
-import { Modal, Button, message, Select,Tabs,Icon, Input } from 'antd';
+import { Modal, Button, message, Select,Tabs,Icon,Input } from 'antd';
 const Option = Select.Option;
 const TabPane = Tabs.TabPane
 import moment from 'moment';
 
 import NewItem from '../../components/performanceTable/Add';
 import EditItem from '../../components/performanceTable/Add';
-import ViewItem from '../../components/performanceTable/Add';
+import ViewItem from '../../components/performanceTable/View';
 import ChartItem from '../../components/performanceTable/Chart';
 import styles from './index.less';
 import { handleColumns, VtxTimeUtil } from '../../utils/tools';
@@ -25,15 +25,14 @@ import {VtxUtil} from '../../utils/util'
 function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
     const {
         searchParams, isAdministrator,
-        waterFactorySelect,
+        performanceTableSelect,queryParams,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys, selectedRows,
-        newItem, editItem, viewItem, title, importError, showUploadModal, chartItem
+        newItem, editItem, viewItem, title, importError, showUploadModal, chartItem,regionalCompanySelect, waterFactorySelect
     } = performanceTable;
     let buttonLimit = {};
     if (accessControlM['ProductionManageFill'.toLowerCase()]) {
         buttonLimit = accessControlM['ProductionManageFill'.toLowerCase()];
     }
-    console.log(buttonLimit)
     const updateState = (obj) => {
         dispatch({
             type: 'performanceTable/updateState',
@@ -65,16 +64,69 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
 
     // 查询
     const vtxGridParams = {
-        // 水厂
-        waterFactoryIdProps: {
+        // 名称
+        nameProps: {
+            value: searchParams.projectName,
+            onChange(e) {
+                updateState({
+                    searchParams: {
+                        projectName: e.target.value
+                    }
+                })
+            },
+            onPressEnter() {
+                getList();
+            },
+            placeholder: '请输入项目名称',
+            maxLength: '32'
+        },
+
+         // 事业部
+         waterFactoryIdProps: {
             value: searchParams.waterFactoryId,
-            showSearch: true,
-            optionFilterProp: 'children',
-            placeholder: "请选择区域",
+            placeholder: "请选择事业部",
             onChange(value) {
                 updateState({
                     searchParams: {
                         waterFactoryId: value
+                    }
+                })
+                getList();
+            },
+            allowClear: true,
+            style: {
+                width: '100%'
+            }
+        },
+
+        // 区域公司
+        regionalCompanyIdProps: {
+            value: searchParams.regionalCompanyId,
+            placeholder: "请选择区域公司",
+            onChange(value) {
+                console.log(value)
+                updateState({
+                    searchParams: {
+                        regionalCompanyId: value
+                    }
+                })
+                getList();
+            },
+            allowClear: true,
+            style: {
+                width: '100%'
+            }
+        },
+        // 水厂
+        performanceTableIdProps: {
+            value: searchParams.performanceTableId,
+            showSearch: true,
+            optionFilterProp: 'children',
+            placeholder: "请选择水厂",
+            onChange(value) {
+                updateState({
+                    searchParams: {
+                        performanceTableId: value
                     }
                 })
                 getList();
@@ -105,21 +157,6 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             }
         },
 
-        nameProps: {
-            value: searchParams.name,
-            onChange(e) {
-                updateState({
-                    searchParams: {
-                        name: e.target.value
-                    }
-                })
-            },
-            onPressEnter() {
-                getList();
-            },
-            placeholder: '请输入名称',
-            maxLength: '32'
-        },
         // 起止时间
         startDateProps: {
             value: [searchParams.startTime, searchParams.endTime],
@@ -150,9 +187,7 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
         }
     };
     // 列表
-    let columns = []
-    title.map(item => { columns.push([item.value, item.key, { width: '200px' }, item.colSpan, item.render]) });
-    columns = columns.concat([['操作', 'action', {
+    let opt = [['操作', 'action', {
         renderButtons: (text,record) => {
             let btns = [];
                 // 查看
@@ -226,11 +261,310 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                 })
             return btns
         }, width: '150px'
-    }]])
+    }]]
+    // tab1
+    let columns = [
+        [ '区域', 'regionalCompanyName' ],
+        [ '项目名称', 'projectName'],
+        [ '雨水管网(公里)', 'rainwaterPipeline' ],
+        [ '污水管网(公里)', 'sewagePipeline' ],
+        ['中水管网(公里)', 'middleWaterPipeline'],
+        ['给水管网(公里)', 'waterSupplyPipeline'],
+        ['雨水泵站(座)', 'rainWaterPump'],
+        ['污水泵站(座)', 'sewagePump'],
+        ['管网(万元/年)', 'pipeNet'],
+        ['项目类型', 'projectTypeStr'],
+        ['备注', 'remark' ],
+    ]
+    columns = columns.concat(opt)
     
+    // tab2
+    let sewageColumns = [
+        [ '区域', 'regionalCompanyName' ],
+        [ '公司名称', 'waterFactoryName'],
+        [ '项目名称(打包项目填写具体子项目明细)', 'projectName' ],
+        [ '项目类型1', 'projectTypeOneStr' ],
+        [ '项目类型2', 'projectTypeTwoStr'],
+        [ '项目类型3(市政/乡(村)镇/自来水/中水/雨水调蓄)', 'projectTypeThreeStr'],
+        [ '设计规模(万吨/日)', 'designScale'],
+        [ '保底水量(万吨/日)', 'bottomWater'],
+        [ '目前单价', 'price'],
+        [ '合同开始日期', 'contractStartTime'],
+        [ '合同终止日期', 'contractEndTime' ],
+        [ '运营年限', 'operationYear' ],
+        [ '投入商业运营时间', 'operationTime' ],
+        [ '收费模式', 'chargingModel' ],
+        [ '出水指标', 'waterTarget' ],
+        [ '设计工艺', 'designProcess' ],
+        [ '所在地', 'address' ],
+    ]
+    sewageColumns = sewageColumns.concat(opt)
+
+    // tab3
+    let performanceColumns = [
+        {
+            title: '区域',
+            dataIndex: 'regionalCompanyName',
+            key: 'regionalCompanyName',
+        },
+        {
+            title: '传统市政水运营',
+            children: [
+                {
+                    title: '所有项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'szAllScale',
+                            key: 'szAllScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'szAllNum',
+                            key: 'szAllNum',
+                        }
+                    ]
+                },
+                {
+                    title: '运行项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'szRunScale',
+                            key: 'szRunScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'szRunNum',
+                            key: 'szRunNum',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: '乡(村)镇污水运营',
+            children: [
+                {
+                    title: '所有项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'xzAllScale',
+                            key: 'xzAllScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'xzAllNum',
+                            key: 'xzAllNum',
+                        }
+                    ]
+                },
+                {
+                    title: '运行项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'xzRunScale',
+                            key: 'xzRunScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'xzRunNum',
+                            key: 'xzRunNum',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: '自来水运营',
+            children: [
+                {
+                    title: '所有项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'zlsAllScale',
+                            key: 'zlsAllScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'zlsAllNum',
+                            key: 'zlsAllNum',
+                        }
+                    ]
+                },
+                {
+                    title: '运行项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'zlsRunScale',
+                            key: 'zlsRunScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'zlsRunNum',
+                            key: 'zlsRunNum',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: '雨水调蓄',
+            children: [
+                {
+                    title: '所有项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'ysAllScale',
+                            key: 'ysAllScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'ysAllNum',
+                            key: 'ysAllNum',
+                        }
+                    ]
+                },
+                {
+                    title: '运行项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'ysRunScale',
+                            key: 'ysRunScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'ysRunNum',
+                            key: 'ysRunNum',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: '中水',
+            children: [
+                {
+                    title: '所有项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'zsAllScale',
+                            key: 'zsAllScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'zsAllNum',
+                            key: 'zsAllNum',
+                        }
+                    ]
+                },
+                {
+                    title: '运行项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'zsRunScale',
+                            key: 'zsRunScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'zsRunNum',
+                            key: 'zsRunNum',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: '合计',
+            children: [
+                {
+                    title: '所有项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'hjAllScale',
+                            key: 'hjAllScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'hjAllNum',
+                            key: 'hjAllNum',
+                        }
+                    ]
+                },
+                {
+                    title: '运行项目',
+                    children: [
+                        {
+                            title: '规模',
+                            dataIndex: 'hjRunScale',
+                            key: 'hjRunScale',
+                        },
+                        {
+                            title: '数量',
+                            dataIndex: 'hjRunNum',
+                            key: 'hjRunNum',
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            title: '管网运营',
+            children: [
+                {
+                    title: '雨水长度(公里)',
+                    dataIndex: 'ysLength',
+                    key: 'ysLength',
+                }
+            ]
+        },
+        {
+            title: '管网运营',
+            children: [
+                {
+                    title: '污水长度(公里)',
+                    dataIndex: 'wsLength',
+                    key: 'wsLength',
+                }
+            ]
+        },
+        {
+            title: '管网运营',
+            children: [
+                {
+                    title: '总长度(公里)',
+                    dataIndex: 'totalLength',
+                    key: 'totalLength',
+                }
+            ]
+        },
+    ]
+
+    let columnsData
+    switch (searchParams.dataFillType) {
+        case 'produce':
+            columnsData = handleColumns(columns);
+            break;
+        case 'assay':
+            columnsData = handleColumns(sewageColumns);
+            break;
+        case 'third':
+            columnsData = performanceColumns;
+            break;
+    }
+
     let vtxDatagridProps = {
         bordered:true,
-        columns: handleColumns(columns),
+        columns: columnsData,
         scroll:{x:true},
         dataSource,
         indexColumn: true,
@@ -282,22 +616,87 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
         if (!status) {
             dispatch({ type: 'performanceTable/initNewItem' });
         }else{
-            dispatch({ type:'performanceTable/getDefaultsewageManagement'})
+            dispatch({ type:'performanceTable/getDefaultperformanceTable'})
         }
+    }
+    let modalTitle
+    let vtxGridTitle
+    let vtxGridWeight
+    let vtxGridSearch
+    switch (searchParams.dataFillType) {
+        case 'produce':
+            modalTitle = '管网业绩表';
+            vtxGridTitle = ['区域', '项目名称']
+            vtxGridWeight = [1,1]
+            vtxGridSearch = <VtxGrid
+                                titles={vtxGridTitle}
+                                gridweight={vtxGridWeight}
+                                confirm={vtxGridParams.query}
+                                clear={vtxGridParams.clear}
+                            >
+                                <Select {...vtxGridParams.regionalCompanyIdProps}>
+                                    {regionalCompanySelect.map(item => {
+                                        return <Select.Option key={item.id}>{item.name}</Select.Option>
+                                    })}
+                                </Select>
+                                <Input {...vtxGridParams.nameProps} />
+                            </VtxGrid>
+            break;
+        case 'assay':
+            modalTitle = '污水厂汇总表';
+            vtxGridTitle = ['区域', '公司名称', '项目名称', '投入商业运营时间']
+            vtxGridWeight = [1,1,1,1]
+            vtxGridSearch = <VtxGrid
+                                titles={vtxGridTitle}
+                                gridweight={vtxGridWeight}
+                                confirm={vtxGridParams.query}
+                                clear={vtxGridParams.clear}
+                            >
+                                <Select {...vtxGridParams.regionalCompanyIdProps}>
+                                    {regionalCompanySelect.map(item => {
+                                        return <Select.Option key={item.id}>{item.name}</Select.Option>
+                                    })}
+                                </Select>
+                                <Select {...vtxGridParams.waterFactoryIdProps}>
+                                    {waterFactorySelect.map(i => {
+                                        return <Select.Option key={i.id}>{i.name}</Select.Option>
+                                    })}
+                                </Select>
+                                <Input {...vtxGridParams.nameProps} />
+                                <VtxRangePicker {...vtxGridParams.startDateProps}/>
+                            </VtxGrid>
+            break;
+        case 'third':
+            vtxGridTitle = ['区域']
+            vtxGridWeight = [1]
+            vtxGridSearch = <VtxGrid
+                                titles={vtxGridTitle}
+                                gridweight={vtxGridWeight}
+                                confirm={vtxGridParams.query}
+                                clear={vtxGridParams.clear}
+                            >
+                                <Select {...vtxGridParams.regionalCompanyIdProps}>
+                                    {regionalCompanySelect.map(item => {
+                                        return <Select.Option key={item.id}>{item.name}</Select.Option>
+                                    })}
+                                </Select>
+                            </VtxGrid>
+            break;
     }
     const newItemProps = {
         updateWindow: updateNewWindow,
         modalProps: {
-            title: '排污许可证 > 新增',
+            title: `${modalTitle} > 新增`,
             visible: newItem.visible,
             onCancel: () => updateNewWindow(false),
             width: 900
         },
         contentProps: {
             ...newItem,
-            waterFactoryId: searchParams.waterFactoryId,
+            performanceTableId: searchParams.performanceTableId,
             importError, showUploadModal,
             dataType:searchParams.dataFillType,
+            regionalCompanySelect,waterFactorySelect,
             btnType: 'add',
             getList,
             updateState,
@@ -314,9 +713,8 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                         btnType: 'add',
                         dataStatus,
                         dataType: searchParams.dataFillType,
-                        waterFactoryId: searchParams.waterFactoryId,
+                        performanceTableId: searchParams.performanceTableId,
                         onSuccess: function () {
-                            message.success('填报辛苦了！');
                             updateNewWindow(false);
                         },
                         onError: function (msg) {
@@ -355,18 +753,17 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
     const editItemProps = {
         updateWindow: updateEditWindow,
         modalProps: {
-            title: '数据填报 > 编辑',
+            title: `${modalTitle} > 编辑`,
             visible: editItem.visible,
             onCancel: () => updateEditWindow(false),
             width: 900
         },
         contentProps: {
-            a5: '测试机构',
-            a6: '测试6',
-            a7: '测试7',
+            dataSource,
             ...editItem,
-            waterFactoryId: searchParams.waterFactoryId,
-            importError, showUploadModal,
+            dataType:searchParams.dataFillType,
+            performanceTableId: searchParams.performanceTableId,
+            importError, showUploadModal,regionalCompanySelect,waterFactorySelect,
             btnType: 'edit',
             updateItem(obj) {
                 updateState({
@@ -376,18 +773,17 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                 })
             },
             save(dataStatus) {
+                console.log('保存')
                 dispatch({
                     type: 'performanceTable/saveOrUpdate', payload: {
                         btnType: 'edit',
-                        dataStatus,
                         dataType: searchParams.dataFillType,
-                        waterFactoryId: searchParams.waterFactoryId,
                         onSuccess: function () {
-                            message.success('填报辛苦了！');
+                            message.success('编辑成功');
                             updateEditWindow(false);
                         },
-                        onError: function (msg) {
-                            message.error(msg);
+                        onError: function () {
+                            message.error('编辑失败');
                         }
                     }
                 })
@@ -400,40 +796,6 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                     }
                 })
             },
-            //计算单耗数据
-            calculateConsumeTargetValue() {
-                dispatch({
-                    type: 'performanceTable/calculateConsumeTargetValue',
-                    payload: {
-                        itemName: 'editItem'
-                    }
-                })
-            },
-            //在计算单耗数据后提交
-            saveAfterCalculateConsumeValue(dataStatus){
-                dispatch({
-                    type: 'performanceTable/calculateConsumeTargetValue',
-                    payload: {
-                        itemName: 'editItem'
-                    }
-                }).then(()=>{
-                        dispatch({
-                            type: 'performanceTable/saveOrUpdate', payload: {
-                                btnType: 'edit',
-                                dataStatus,
-                                dataType: searchParams.dataFillType,
-                                waterFactoryId: searchParams.waterFactoryId,
-                                onSuccess: function () {
-                                    message.success('填报辛苦了！');
-                                    updateEditWindow(false);
-                                },
-                                onError: function (msg) {
-                                    message.error(msg);
-                                }
-                            }
-                        })
-                })
-            }
         }
     };
 
@@ -448,16 +810,15 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
     const viewItemProps = {
         updateWindow: updateViewWindow,
         modalProps: {
-            title: '数据填报 > 查看',
+            title: `${modalTitle} > 查看`,
             visible: viewItem.visible,
             onCancel: () => updateViewWindow(false),
             width: 900
         },
         contentProps: {
             ...viewItem,
-            a5: '测试机构',
-            a6: '测试6',
-            a7: '测试7',
+            dataSource,
+            dataType:searchParams.dataFillType,
             btnType: 'view',
             updateChartItem(obj){
                 updateState({
@@ -466,11 +827,11 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                     }
                 })
             },
-            getChartData({dateValue, waterFactoryId, libraryId} ){
+            getChartData({dateValue, performanceTableId, libraryId} ){
                 dispatch({
                     type:'performanceTable/getSevenDayData',
                     payload:{
-                        dateValue, waterFactoryId, libraryId
+                        dateValue, performanceTableId, libraryId
                     }
                 })
             },
@@ -497,26 +858,6 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             }
         }
     };
-    //--------------折线图弹窗---------------
-    const updateChartWindow = (status = true) => {
-        updateState({
-            chartItem: {
-                visible: status
-            }
-        })
-    }
-    const chartItemProps = {
-        updateWindow: updateChartWindow,
-        modalProps: {
-            title: '近七天变化',
-            visible: chartItem.visible,
-            onCancel: () => updateChartWindow(false),
-            width:700
-        },
-        contentProps:{
-            ...chartItem,
-        }
-    }
     //--------------删除------------------
     const deleteItems = () => {
         Modal.confirm({
@@ -551,10 +892,8 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
         downloadURL: '/cloud/gzzhsw/api/cp/data/fill/exportDataExcel',
         getExportParams(exportType) {
             const param = {
-                waterFactoryId: searchParams.waterFactoryId,
-                startTime: searchParams.startTime,
-                endTime: searchParams.endTime,
-                dataFillType: searchParams.dataFillType,
+                regionalCompanyId: '',
+                waterFactoryId: '',
                 tenantId: VtxUtil.getUrlParam('tenantId'),
             };
             switch (exportType) {
@@ -589,20 +928,7 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
     }
     return (
         <div className={styles.normal}>
-            <VtxGrid
-                titles={['区域', '项目名称']}
-                gridweight={[1, 1]}
-                confirm={vtxGridParams.query}
-                clear={vtxGridParams.clear}
-            >
-                <Select {...vtxGridParams.waterFactoryIdProps}>
-                    {waterFactorySelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
-                    })}
-                </Select>
-                <Input {...vtxGridParams.nameProps}>
-                </Input>
-            </VtxGrid>
+            {vtxGridSearch}
             <div className={styles.normal_body}>
                 
                 <div className={styles.tabContainer}>
@@ -615,20 +941,17 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                         getList();
                     }}>
                         <TabPane tab='管网业绩表' key='produce' />
-                        <TabPane tab='污水厂汇总表' key='second' />
+                        <TabPane tab='污水厂汇总表' key='assay' />
                         <TabPane tab='业绩汇总表' key='third' />
                     </Tabs>
                 </div>
                 <div className={styles.buttonContainer}>
-                    {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
-                    {buttonLimit['DELETE'] && <Button icon="delete" disabled={selectedRowKeys.length == 0 || canDelete()} onClick={deleteItems}>删除</Button>}
-                    <Button icon='download' onClick={() => { window.open(`/cloud/gzzhsw/api/cp/data/fill/exportExcel?waterFactoryId=${searchParams.waterFactoryId}&dataFillType=${searchParams.dataFillType}&tenantId=${VtxUtil.getUrlParam('tenantId')}`) }}>模版下载</Button>
+                    {buttonLimit['ADD']&&searchParams.dataFillType!=='third'&&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
+                    {buttonLimit['DELETE']&&searchParams.dataFillType!=='third'&&<Button icon="delete" onClick={deleteItems}>删除</Button>}
+                    {searchParams.dataFillType!=='third'&&<Button icon='download' onClick={() => { window.open(`/cloud/gzzhsw/api/cp/data/fill/exportExcel?performanceTableId=${searchParams.performanceTableId}&dataFillType=${searchParams.dataFillType}&tenantId=${VtxUtil.getUrlParam('tenantId')}`) }}>模版下载</Button>}
                     {buttonLimit['EXPORT'] &&<VtxExport2  {...exportProps}>
                         <Button icon="export">导出</Button>
                     </VtxExport2>}
-                    {buttonLimit['SUBMIT'] &&<Button icon="cloud-upload-o" onClick={() => {
-                            updateState({ showUploadModal: true, importError: '' });
-                        }}>上传</Button>}
                 </div>
                 <div className={styles.tableContainer}>
                     <VtxDatagrid {...vtxDatagridProps} />

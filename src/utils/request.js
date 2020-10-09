@@ -11,9 +11,8 @@ import {VtxUtil} from './util';
 export default function request(url, options={}) {
     let postData = {};
     let qstr = {
-        // tenantId: VtxUtil.getUrlParam('tenantId'),
-        tenantId: '35163d2c58a140cd8d6770262683178b',
-        userId: VtxUtil.getUrlParam('userId'),
+        tenantId: VtxUtil.getUrlParam('tenantId'),
+        // userId: VtxUtil.getUrlParam('userId'),
         // token: VtxUtil.getUrlParam('token'),
     }
     if(options.body){   

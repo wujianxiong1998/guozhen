@@ -53,7 +53,7 @@ class ADD extends React.Component {
             this.setState({ historyModalVisible: true })
         }
         
-        let uploadProps = (name,fieldCode,photoIds,require = true)=>{
+        let uploadProps = (name,fieldCode,photoIds,require)=>{
             return {
                 action:"/cloudFile/common/uploadFile",
                 downLoadURL:'/cloudFile/common/downloadFile?id=',
@@ -67,6 +67,8 @@ class ADD extends React.Component {
                         value:photoIds
                     }
                 },
+                multiple: false,
+                viewMode: true,
                 listType:"text",
                 mode:'multiple',
                 onSuccess(file){
@@ -82,6 +84,22 @@ class ADD extends React.Component {
                 fileListVersion,
             }
         }
+        // const fileProps = {
+        //     fileList: !!detail.fileIds ? JSON.parse(detail.fileIds) : [],
+        //     onSuccess: (file) => {
+        //         let result = !!detail.fileIds ? JSON.parse(detail.fileIds) : [];
+        //         result.push({id: file.id, name: file.name});
+        //         changeDetail('fileIds', JSON.stringify(result))
+        //     },
+        //     onRemove: (file) => {
+        //         let result = !!detail.fileIds ? JSON.parse(detail.fileIds) : [];
+        //         changeDetail('fileIds', JSON.stringify(result.map(item => {
+        //             if (item.id !== file.id) {
+        //                 return item
+        //             }
+        //         }).filter(item => !!item)))
+        //     },
+        // };
         return (
             <div>
                 <VtxModal

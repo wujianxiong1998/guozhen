@@ -2,10 +2,30 @@ import request, {requestJson} from '../utils/request';
 
 //========================================删除接口
 export async function commonDelete(param) {
+    if(param.type==="basicInformation") {
+        param.type = 'waterFactory'
+    }
+    if(param.type==="factoryFile") {
+        return request(`/cloud/gzzhsw/api/cp/basic/0neFactoryOneGear/delete`, {
+            method: 'get',
+            body: {
+                ids: param.ids
+            }
+        })
+    }
+    if(param.type==="sewageManagement") {
+        return request(`/cloud/gzzhsw/api/cp/water/sewageDischargePermission/delete`, {
+            method: 'get',
+            body: {
+                ids: param.ids
+            }
+        })
+    }
     return request('/cloud/gzzhsw/api/cp/data/verify/delete.smvc', {
         method: 'post',
         body: param,
     })
+    
 }
 
 //========================================下拉接口
@@ -193,7 +213,6 @@ export async function updateWaterFactory(param) {
 //=========================================水厂-基础信息==============================================
 //分页
 export async function getBasicInformationList(param) {
-    console.log('基础信息分页')
     return request('/cloud/gzzhsw/api/cp/water/factory/page.smvc', {
         method: 'post',
         body: param,
@@ -232,6 +251,14 @@ export async function addFactoryFile(param) {
     })
 }
 
+//修改
+export async function updateFactoryFile(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/basic/0neFactoryOneGear/update.smvc', {
+        method: 'post',
+        body: param,
+    })
+}
+
 //=========================================水厂-排污管理
 //分页
 export async function getSewageManagementList(param) {
@@ -256,10 +283,69 @@ export async function updateSewageManagement(param) {
         body: param,
     })
 }
+//新增(填报)
+export async function addSewageReport(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/water/sewageDischargeReport/save', {
+        method: 'post',
+        body: param,
+    })
+}
+
+//修改（填报）
+export async function updateSewageReport(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/water/sewageDischargeReport/update', {
+        method: 'post',
+        body: param,
+    })
+}
+
+//=========================================水厂-业绩表
+//分页
+export async function getPerformanceTableList(param) {
+    return request('/cloud/gzzhsw/api/cp/water/sewageDischargePermission/page', {
+        method: 'get',
+        body: param,
+    })
+}
+
+//新增（管网）
+export async function addPipeline(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/basic/pipelineNetPerformance/save.smvc', {
+        method: 'post',
+        body: param,
+    })
+}
+
+//修改
+export async function updatePipeline(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/basic/pipelineNetPerformance/update.smvc', {
+        method: 'post',
+        body: param,
+    })
+}
+
+//新增(污水厂）
+export async function addSewage(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/basic/sewageFactory/save.smvc', {
+        method: 'post',
+        body: param,
+    })
+}
+
+//修改
+export async function updateSewage(param) {
+    return requestJson('/cloud/gzzhsw/api/cp/basic/sewageFactory/update.smvc', {
+        method: 'post',
+        body: param,
+    })
+}
+
+
 
 // 历史查询
 export async function getFactoryHistory(param) {
-    return requestJson('/cloud/gzzhsw/api/cp/water/factoryHistory/list', {
+    console.log(param)
+    return request('/cloud/gzzhsw/api/cp/water/factoryHistory/page', {
         method: 'get',
         body: param,
     })

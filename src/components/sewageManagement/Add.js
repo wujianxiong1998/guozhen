@@ -26,7 +26,6 @@ class ADD extends React.Component {
     footerRender() {
         const { contentProps, updateWindow } = this.props;
         const { loading, save, editType, btnType, dataType, saveAfterCalculateConsumeValue } = contentProps;
-        console.log(contentProps)
         const fillData = contentProps.fillData||[]
         const _t = this;
         //验证表格中是否有未填项
@@ -51,18 +50,24 @@ class ADD extends React.Component {
                 dischargeOutletDistribution,scale,exeStandard,
                 limitConcentrationVolume,yearLimitVolume,startDate,
                 endDate,permitRemark,envReport,envScheme,contingencyPlan,permission,username,password,
-                remark,state,regionalCompanySelect
+                remark,state,regionalCompanySelect,waterFactoryId,waterFactorySelect,
+                // 填报
+                concentrationCod,concentrationNh3n,concentrationTn,concentrationTp,date,name,pollutionCod,pollutionNh3n,
+                pollutionTn,pollutionTp,
+                waterVolume,
+
         } = contentProps
         const { updateItem, updateState, getList, calculateTargetValue, calculateConsumeTargetValue } = contentProps;
         let {isOpen} = this.state
         // btnType === 'add' ?
         let isDisabled = btnType==='view'?true:false
         let isDefault = btnType==='add'?false:true
+        console.log(dataType)
+        
         return (
-            <FullScreenModal
+            dataType==='produce'?<FullScreenModal
                 {...modalProps}
-                footer={this.footerRender()}
-            >
+                footer={this.footerRender()}>
                 <PublicModal title={'排污许可证信息'}></PublicModal>
                 <VtxModalList
                     isRequired
@@ -72,12 +77,13 @@ class ADD extends React.Component {
                     
                     <Select
                         value={regionalCompanyName}
-                        onSelect={(value,option) => {                                
+                        onSelect={(value,option) => {   
                             updateItem({
-                                regionalCompanyName: value,
-                                regionalCompanyId: option.props.unitId
+                                regionalCompanyName: option.props.children,
+                                regionalCompanyId: value
                             })
                         }}
+                        defaultValue={regionalCompanyName}
                         placeholder="请选择区域（必选项）"
                         // allowClear
                         data-modallist={{
@@ -85,7 +91,7 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: true,
                                 name: '区域',
-                                width: '80',
+                                width: '40',
                                 key: 'regionalCompanyId'
                             },
                             regexp: {
@@ -97,32 +103,36 @@ class ADD extends React.Component {
                             return <Select.Option unitId={item.parentId} key={item.id}>{item.name}</Select.Option>
                         })}
                     </Select>
-                    <Input
-                        disabled={isDisabled}
-                        defaultValue={isDefault?waterFactoryName:''}
+                    <Select
                         value={waterFactoryName}
-                        onChange={(e) => {
+                        onSelect={(value,option) => {                                
                             updateItem({
-                                waterFactoryName : e.target.value
+                                waterFactoryName: option.props.children,
+                                waterFactoryId: value
                             })
                         }}
-                        //placeholder="请输入公司名称"
-                        maxLength="32"
+                        defaultValue={waterFactoryName}
+                        // allowClear
                         data-modallist={{
-                            layout:{
+                            layout: {
                                 comType: 'input',
                                 require: true,
                                 name: '公司名称',
-                                width: '33',
+                                width: '40',
                                 key: 'waterFactoryName'
                             },
-                            regexp : {
-                                value : waterFactoryName,
+                            regexp: {
+                                value: waterFactoryName
                             }
-                        }}/>
+                        }}
+                    >
+                        {waterFactorySelect.map(item => {
+                            return <Select.Option unitId={item.parentId} key={item.id}>{item.name}</Select.Option>
+                        })}
+                    </Select>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?permission:''}
+                        defaultValue={permission}
                         value={permission}
                         onChange={(e) => {
                             updateItem({
@@ -146,7 +156,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?permissionCode:''}
+                        defaultValue={permissionCode}
                         value={permissionCode}
                         onChange={(e) => {
                             updateItem({
@@ -170,7 +180,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?orgCode:''}
+                        defaultValue={orgCode}
                         value={orgCode}
                         onChange={(e) => {
                             updateItem({
@@ -194,7 +204,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?legalRepresentative:''}
+                        defaultValue={legalRepresentative}
                         value={legalRepresentative}
                         onChange={(e) => {
                             updateItem({
@@ -218,7 +228,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?issueUnit:''}
+                        defaultValue={issueUnit}
                         value={issueUnit}
                         onChange={(e) => {
                             updateItem({
@@ -242,7 +252,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?mainContaminant:''}
+                        defaultValue={mainContaminant}
                         value={mainContaminant}
                         onChange={(e) => {
                             updateItem({
@@ -266,7 +276,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?emissionsWay:''}
+                        defaultValue={emissionsWay}
                         value={emissionsWay}
                         onChange={(e) => {
                             updateItem({
@@ -290,7 +300,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?dischargeOutletNum:''}
+                        defaultValue={dischargeOutletNum}
                         value={dischargeOutletNum}
                         onChange={(e) => {
                             updateItem({
@@ -314,7 +324,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?dischargeOutletDistribution:''}
+                        defaultValue={dischargeOutletDistribution}
                         value={dischargeOutletDistribution}
                         onChange={(e) => {
                             updateItem({
@@ -338,7 +348,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?scale:''}
+                        defaultValue={scale}
                         value={scale}
                         onChange={(e) => {
                             updateItem({
@@ -360,81 +370,9 @@ class ADD extends React.Component {
                                 exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
-                    {/* <Input
-                        disabled={isDisabled}
-                        defaultValue={isDefault?mainContaminant:''}
-                        value={mainContaminant}
-                        onChange={(e) => {
-                            updateItem({
-                                mainContaminant : e.target.value
-                            })
-                        }}
-                        //placeholder="请输入主要污染物种类"
-                        maxLength="32"
-                        data-modallist={{
-                            layout:{
-                                comType: 'input',
-                                require: false,
-                                name: '主要污染物种类',
-                                width: '33',
-                                key: 'mainContaminant'
-                            },
-                            regexp : {
-                                value : mainContaminant,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
-                            }
-                        }}/> */}
-                    {/* <Input
-                        disabled={isDisabled}
-                        defaultValue={isDefault?mainContaminant:''}
-                        value={mainContaminant}
-                        onChange={(e) => {
-                            updateItem({
-                                mainContaminant : e.target.value
-                            })
-                        }}
-                        //placeholder="请输入限排污染物名称"
-                        maxLength="32"
-                        data-modallist={{
-                            layout:{
-                                comType: 'input',
-                                require: false,
-                                name: '限排污染物名称',
-                                width: '33',
-                                key: 'mainContaminant'
-                            },
-                            regexp : {
-                                value : mainContaminant,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
-                            }
-                        }}/> */}
-                    {/* <Input
-                        disabled={isDisabled}
-                        defaultValue={isDefault?emissionsWay:''}
-                        value={emissionsWay}
-                        onChange={(e) => {
-                            updateItem({
-                                emissionsWay : e.target.value
-                            })
-                        }}
-                        //placeholder="排污许可证"
-                        maxLength="32"
-                        data-modallist={{
-                            layout:{
-                                comType: 'input',
-                                require: false,
-                                name: '排放方式',
-                                width: '33',
-                                key: 'emissionsWay'
-                            },
-                            regexp : {
-                                value : emissionsWay,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
-                            }
-                        }}/> */}
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?exeStandard:''}
+                        defaultValue={exeStandard}
                         value={exeStandard}
                         onChange={(e) => {
                             updateItem({
@@ -458,7 +396,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?limitConcentrationVolume:''}
+                        defaultValue={limitConcentrationVolume}
                         value={limitConcentrationVolume}
                         onChange={(e) => {
                             updateItem({
@@ -482,7 +420,7 @@ class ADD extends React.Component {
                         }}/>
                     <Input
                         disabled={isDisabled}
-                        defaultValue={isDefault?yearLimitVolume:''}
+                        defaultValue={yearLimitVolume}
                         value={yearLimitVolume}
                         onChange={(e) => {
                             updateItem({
@@ -525,7 +463,7 @@ class ADD extends React.Component {
                         data-modallist={{
                             layout: {
                                 comType: '',
-                                require: true,
+                                require: false,
                                 name: '排污许可证发证日期',
                                 width: '40',
                                 key: 'startDate'
@@ -555,7 +493,7 @@ class ADD extends React.Component {
                         data-modallist={{
                             layout: {
                                 comType: '',
-                                require: true,
+                                require: false,
                                 name: '排污许可证有效期',
                                 width: '40',
                                 key: 'endDate'
@@ -578,7 +516,7 @@ class ADD extends React.Component {
                         data-modallist={{
                             layout:{
                                 comType: 'input',
-                                require: true,
+                                require: false,
                                 name: '排污许可备注',
                                 width: '70',
                                 maxNum: 500,
@@ -591,50 +529,65 @@ class ADD extends React.Component {
                     />
                     <RadioGroup 
                         disabled={isDisabled}
-                        defaultValue={isDefault?envReport:0}
+                        onChange={(e)=>{
+                            updateItem({
+                                envReport:e.target.value || 0
+                            })
+                        }}
+                        defaultValue={envReport==='有'?1:0}
                         data-modallist={{
                             layout: {
                                 comType: '',
-                                require: true,
+                                require: false,
                                 name: '环境影响评价报告',
                                 width: '33',
                                 key: 'envReport'
                             },
                         }}
                     >
-                        <Radio value={envReport}>有</Radio>
+                        <Radio value={1}>有</Radio>
                         <Radio value={0}>无</Radio>
                     </RadioGroup>
                     <RadioGroup 
                         disabled={isDisabled}
-                        defaultValue={isDefault?envScheme:0}
+                        defaultValue={envScheme==='有'?1:0}
+                        onChange={(e)=>{
+                            updateItem({
+                                envScheme:e.target.value || 0
+                            })
+                        }}
                         data-modallist={{
                             layout: {
                                 comType: '',
-                                require: true,
+                                require: false,
                                 name: '环境自行监测方案',
                                 width: '33',
                                 key: 'envScheme'
                             },
                         }}
                     >
-                        <Radio value={envScheme}>有</Radio>
+                        <Radio value={1}>有</Radio>
                         <Radio value={0}>无</Radio>
                     </RadioGroup>
                     <RadioGroup 
-                            disabled={isDisabled}
-                            defaultValue={isDefault?contingencyPlan:0}
+                        disabled={isDisabled}
+                        defaultValue={contingencyPlan==='有'?1:0}
+                        onChange={(e)=>{
+                            updateItem({
+                                contingencyPlan :e.target.value || 0
+                            })
+                        }}
                         data-modallist={{
                             layout: {
                                 comType: '',
-                                require: true,
+                                require: false,
                                 name: '突发环境应急预案',
                                 width: '33',
                                 key: 'contingencyPlan'
                             },
                         }}
                     >
-                        <Radio value={contingencyPlan}>有备案</Radio>
+                        <Radio value={1}>有备案</Radio>
                         <Radio value={0}>无备案</Radio>
                     </RadioGroup>
                     <TextArea
@@ -650,7 +603,7 @@ class ADD extends React.Component {
                         data-modallist={{
                             layout:{
                                 comType: 'input',
-                                require: true,
+                                require: false,
                                 name: '备注',
                                 width: '70',
                                 maxNum: 500,
@@ -671,7 +624,7 @@ class ADD extends React.Component {
                     <Input
                         value={username}
                         disabled={isDisabled}
-                        defaultValue={isDefault?username:''}
+                        defaultValue={username}
                         onChange={(e) => {
                             updateItem({
                                 username : e.target.value
@@ -710,7 +663,7 @@ class ADD extends React.Component {
                             type={isOpen?'text':'password'}
                             value={password}
                             disabled={isDisabled}
-                            defaultValue={isDefault?password:''}
+                            defaultValue={password}
                             onChange={(e) => {
                                 updateItem({
                                     password : e.target.value
@@ -726,6 +679,474 @@ class ADD extends React.Component {
                     </div>
                     
                 </VtxModalList>
+            </FullScreenModal>:<FullScreenModal {...modalProps}
+                footer={this.footerRender()}>
+                <VtxModalList
+                    isRequired
+                    visible={modalProps.visible}
+                    ref={this.modalListRef}
+                >
+                    <VtxDatePicker
+                        value={date}
+                        disabled={isDisabled}
+                        onChange={(date, dateString) => {
+                            updateItem({
+                                date: dateString
+                            });
+                            if (dataType=='consum'){
+                                calculateConsumeTargetValue()
+                            }
+                            
+                        }}
+                        disabledDate={
+                            (current)=>{
+                                return VtxTimeUtil.isAfterDate(current);
+                            }
+                        }
+                        data-modallist={{
+                            layout: {
+                                comType: '',
+                                require: true,
+                                name: '填报日期',
+                                width: '40',
+                                key: 'date'
+                            },
+                            regexp: {
+                                value: startDate
+                            }
+                        }}
+                    />
+                    <Select
+                        value={regionalCompanyName}
+                        onSelect={(value,option) => {   
+                            updateItem({
+                                regionalCompanyName: option.props.children,
+                                regionalCompanyId: value
+                            })
+                        }}
+                        defaultValue={regionalCompanyName}
+                        placeholder="请选择区域（必选项）"
+                        // allowClear
+                        data-modallist={{
+                            layout: {
+                                comType: 'input',
+                                require: true,
+                                name: '区域',
+                                width: '40',
+                                key: 'regionalCompanyId'
+                            },
+                            regexp: {
+                                value: regionalCompanyId
+                            }
+                        }}>
+                        {regionalCompanySelect.map(item => {
+                            return <Select.Option unitId={item.parentId} key={item.id}>{item.name}</Select.Option>
+                        })}
+                    </Select>
+                    <Select
+                        value={waterFactoryName}
+                        onSelect={(value,option) => {                                
+                            updateItem({
+                                waterFactoryName: option.props.children,
+                                waterFactoryId: value
+                            })
+                        }}
+                        defaultValue={waterFactoryName}
+                        // allowClear
+                        data-modallist={{
+                            layout: {
+                                comType: 'input',
+                                require: true,
+                                name: '公司名称',
+                                width: '40',
+                                key: 'waterFactoryName'
+                            },
+                            regexp: {
+                                value: waterFactoryName
+                            }
+                        }}
+                    >
+                        {waterFactorySelect.map(item => {
+                            return <Select.Option unitId={item.parentId} key={item.id}>{item.name}</Select.Option>
+                        })}
+                    </Select>
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={mainContaminant}
+                        value={mainContaminant}
+                        onChange={(e) => {
+                            updateItem({
+                                mainContaminant : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '主要污染物种类',
+                                width: '33',
+                                key: 'mainContaminant'
+                            },
+                            regexp : {
+                                value : mainContaminant,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={name}
+                        value={name}
+                        onChange={(e) => {
+                            updateItem({
+                                name : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '排污物名称',
+                                width: '33',
+                                key: 'name'
+                            },
+                            regexp : {
+                                value : name,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={scale}
+                        value={scale}
+                        onChange={(e) => {
+                            updateItem({
+                                scale : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '设计规模',
+                                width: '33',
+                                key: 'scale'
+                            },
+                            regexp : {
+                                value : scale,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={exeStandard}
+                        value={exeStandard}
+                        onChange={(e) => {
+                            updateItem({
+                                exeStandard : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '执行的污染物排放标准',
+                                width: '33',
+                                key: 'exeStandard'
+                            },
+                            regexp : {
+                                value : exeStandard,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={limitConcentrationVolume}
+                        value={limitConcentrationVolume}
+                        onChange={(e) => {
+                            updateItem({
+                                limitConcentrationVolume : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '主要污染物排放浓度限量',
+                                width: '33',
+                                key: 'limitConcentrationVolume'
+                            },
+                            regexp : {
+                                value : limitConcentrationVolume,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={yearLimitVolume}
+                        value={yearLimitVolume}
+                        onChange={(e) => {
+                            updateItem({
+                                yearLimitVolume : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '年度排污物排放值',
+                                width: '33',
+                                key: 'yearLimitVolume'
+                            },
+                            regexp : {
+                                value : yearLimitVolume,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+
+                    <Input
+                        disabled={isDisabled}
+                        defaultValue={waterVolume}
+                        value={waterVolume}
+                        onChange={(e) => {
+                            updateItem({
+                                waterVolume : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: '排放水量(万吨)',
+                                width: '33',
+                                key: 'waterVolume'
+                            },
+                            regexp : {
+                                value : waterVolume,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                    </VtxModalList>
+                    <PublicModal title={'排放水质指标浓度(mg/L)'}></PublicModal>
+                    <VtxModalList
+                        isRequired
+                        visible={modalProps.visible}
+                        ref={this.modalListRef}
+                    >
+                        <Input
+                        disabled={isDisabled}
+                        defaultValue={concentrationCod}
+                        value={concentrationCod}
+                        onChange={(e) => {
+                            updateItem({
+                                concentrationCod : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: 'COD',
+                                width: '33',
+                                key: 'concentrationCod'
+                            },
+                            regexp : {
+                                value : concentrationCod,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                        <Input
+                        disabled={isDisabled}
+                        defaultValue={concentrationNh3n}
+                        value={concentrationNh3n}
+                        onChange={(e) => {
+                            updateItem({
+                                concentrationNh3n : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: 'NH3-N',
+                                width: '33',
+                                key: 'concentrationNh3n'
+                            },
+                            regexp : {
+                                value : concentrationNh3n,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                        <Input
+                        disabled={isDisabled}
+                        defaultValue={concentrationTn}
+                        value={concentrationTn}
+                        onChange={(e) => {
+                            updateItem({
+                                concentrationTn : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: 'TN',
+                                width: '33',
+                                key: 'concentrationTn'
+                            },
+                            regexp : {
+                                value : concentrationTn,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                        <Input
+                        disabled={isDisabled}
+                        defaultValue={concentrationTp}
+                        value={concentrationTp}
+                        onChange={(e) => {
+                            updateItem({
+                                concentrationTp : e.target.value
+                            })
+                        }}
+                        //placeholder="排污许可证"
+                        maxLength="32"
+                        data-modallist={{
+                            layout:{
+                                comType: 'input',
+                                require: false,
+                                name: 'TP',
+                                width: '33',
+                                key: 'concentrationTp'
+                            },
+                            regexp : {
+                                value : concentrationTp,
+                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                            }
+                        }}/>
+                        </VtxModalList>
+                        <PublicModal title={'排放水质指标污染量(t)'}></PublicModal>
+                        <VtxModalList
+                            isRequired
+                            visible={modalProps.visible}
+                            ref={this.modalListRef}
+                        >
+                            <Input
+                            disabled={isDisabled}
+                            defaultValue={pollutionCod}
+                            value={pollutionCod}
+                            onChange={(e) => {
+                                updateItem({
+                                    pollutionCod : e.target.value
+                                })
+                            }}
+                            maxLength="32"
+                            data-modallist={{
+                                layout:{
+                                    comType: 'input',
+                                    require: false,
+                                    name: 'COD',
+                                    width: '33',
+                                    key: 'pollutionCod'
+                                },
+                                regexp : {
+                                    value : pollutionCod,
+                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                                }
+                            }}/>
+                            <Input
+                            disabled={isDisabled}
+                            defaultValue={pollutionNh3n}
+                            value={pollutionNh3n}
+                            onChange={(e) => {
+                                updateItem({
+                                    pollutionNh3n : e.target.value
+                                })
+                            }}
+                            //placeholder="排污许可证"
+                            maxLength="32"
+                            data-modallist={{
+                                layout:{
+                                    comType: 'input',
+                                    require: false,
+                                    name: 'NH3-N',
+                                    width: '33',
+                                    key: 'pollutionNh3n'
+                                },
+                                regexp : {
+                                    value : pollutionNh3n,
+                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                                }
+                            }}/>
+                            <Input
+                            disabled={isDisabled}
+                            defaultValue={pollutionTn}
+                            value={pollutionTn}
+                            onChange={(e) => {
+                                updateItem({
+                                    pollutionTn : e.target.value
+                                })
+                            }}
+                            //placeholder="排污许可证"
+                            maxLength="32"
+                            data-modallist={{
+                                layout:{
+                                    comType: 'input',
+                                    require: false,
+                                    name: 'TN',
+                                    width: '33',
+                                    key: 'pollutionTn'
+                                },
+                                regexp : {
+                                    value : pollutionTn,
+                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                                }
+                            }}/>
+                            <Input
+                            disabled={isDisabled}
+                            defaultValue={pollutionTp}
+                            value={pollutionTp}
+                            onChange={(e) => {
+                                updateItem({
+                                    pollutionTp : e.target.value
+                                })
+                            }}
+                            //placeholder="排污许可证"
+                            maxLength="32"
+                            data-modallist={{
+                                layout:{
+                                    comType: 'input',
+                                    require: false,
+                                    name: 'TP',
+                                    width: '33',
+                                    key: 'pollutionTp'
+                                },
+                                regexp : {
+                                    value : pollutionTp,
+                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                                }
+                            }}/>
+                    </VtxModalList>
             </FullScreenModal>
                 
         )

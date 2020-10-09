@@ -1,5 +1,5 @@
 /**
- * 数据填报
+ * 排污许可证
  * author : vtx xxy
  * createTime : 2019-07-23 11:38:59
  */
@@ -16,7 +16,7 @@ import moment from 'moment';
 
 import NewItem from '../../components/sewageManagement/Add';
 import EditItem from '../../components/sewageManagement/Add';
-import ViewItem from '../../components/sewageManagement/Add';
+import ViewItem from '../../components/sewageManagement/View';
 import ChartItem from '../../components/sewageManagement/Chart';
 import styles from './index.less';
 import { handleColumns, VtxTimeUtil } from '../../utils/tools';
@@ -27,7 +27,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         searchParams, isAdministrator,
         sewageManagementSelect,queryParams,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys, selectedRows,
-        newItem, editItem, viewItem, title, importError, showUploadModal, chartItem,regionalCompanySelect
+        newItem, editItem, viewItem, title, importError, showUploadModal, chartItem,regionalCompanySelect, waterFactorySelect
     } = sewageManagement;
     let buttonLimit = {};
     if (accessControlM['ProductionManageFill'.toLowerCase()]) {
@@ -64,6 +64,42 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
 
     // 查询
     const vtxGridParams = {
+         // 事业部
+         waterFactoryIdProps: {
+            value: searchParams.waterFactoryId,
+            placeholder: "请选择事业部",
+            onChange(value) {
+                updateState({
+                    searchParams: {
+                        waterFactoryId: value
+                    }
+                })
+                getList();
+            },
+            allowClear: true,
+            style: {
+                width: '100%'
+            }
+        },
+
+        // 区域公司
+        regionalCompanyIdProps: {
+            value: searchParams.regionalCompanyId,
+            placeholder: "请选择区域公司",
+            onChange(value) {
+                console.log(value)
+                updateState({
+                    searchParams: {
+                        regionalCompanyId: value
+                    }
+                })
+                getList();
+            },
+            allowClear: true,
+            style: {
+                width: '100%'
+            }
+        },
         // 水厂
         sewageManagementIdProps: {
             value: searchParams.sewageManagementId,
@@ -84,45 +120,45 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         },
 
         // 时间快速选择
-        // quickDateProps: {
-        //     value: searchParams.quickDate,
-        //     onChange(date, dateString) {
-        //         updateState({
-        //             searchParams: {
-        //                 quickDate: dateString,
-        //                 startTime: moment(dateString).startOf('month').format('YYYY-MM-DD'),
-        //                 endTime: (moment(dateString).month() == moment().month() && moment(dateString).year() == moment().year()) ? moment().format('YYYY-MM-DD'):moment(dateString).endOf('month').format('YYYY-MM-DD')
-        //             }
-        //         })
-        //         getList();
-        //     },
-        //     style: {
-        //         width: '100%'
-        //     },
-        //     disabledDate(current) {
-        //         return VtxTimeUtil.isAfterDate(current);
-        //     }
-        // },
+        quickDateProps: {
+            value: searchParams.quickDate,
+            onChange(date, dateString) {
+                updateState({
+                    searchParams: {
+                        quickDate: dateString,
+                        startTime: moment(dateString).startOf('month').format('YYYY-MM-DD'),
+                        endTime: (moment(dateString).month() == moment().month() && moment(dateString).year() == moment().year()) ? moment().format('YYYY-MM-DD'):moment(dateString).endOf('month').format('YYYY-MM-DD')
+                    }
+                })
+                getList();
+            },
+            style: {
+                width: '100%'
+            },
+            disabledDate(current) {
+                return VtxTimeUtil.isAfterDate(current);
+            }
+        },
 
         // 起止时间
-        // startDateProps: {
-        //     value: [searchParams.startTime, searchParams.endTime],
-        //     onChange(date, dateString) {
-        //         updateState({
-        //             searchParams: {
-        //                 startTime: dateString[0],
-        //                 endTime: dateString[1]
-        //             }
-        //         })
-        //         getList();
-        //     },
-        //     style: {
-        //         width: '100%'
-        //     },
-        //     disabledDate(current) {
-        //         return current && VtxTimeUtil.isAfterDate(current);
-        //     }
-        // },
+        startDateProps: {
+            value: [searchParams.startTime, searchParams.endTime],
+            onChange(date, dateString) {
+                updateState({
+                    searchParams: {
+                        startTime: dateString[0],
+                        endTime: dateString[1]
+                    }
+                })
+                getList();
+            },
+            style: {
+                width: '100%'
+            },
+            disabledDate(current) {
+                return current && VtxTimeUtil.isAfterDate(current);
+            }
+        },
 
         query() {
             getList();
@@ -135,54 +171,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     };
     // 列表
     let columns;
-    columns = searchParams.dataFillType==='produce'?[
-        [ '区域', 'regionalCompanyName' ],
-        [ '公司名称', 'waterFactoryName'],
-        [ '证书编号', 'permissionCode' ],
-        [ '组织机构代码', 'orgCode' ],
-        ['法定代表人', 'legalRepresentative'],
-        ['发证单位', 'issueUnit'],
-        ['主要污染物种类及限排污染物名称', 'mainContaminant'],
-        ['排放方式', 'emissionsWay'],
-        ['排放口数量(座)', 'dischargeOutletNum'],
-        ['排放口分布情况', 'dischargeOutletDistribution'],
-        ['设计规模', 'scale' ],
-        ['执行的污染物排放标准', 'exeStandard'],
-        ['主要污染物排放浓度限值', 'limitConcentrationVolume'],
-        ['年度污染物排放限值', 'yearLimitVolume'],
-        ['排污许可证发证日期', 'startDate'],
-        ['排污许可证有效期', 'endDate'], 
-        ['排污许可备注', 'permitRemark'], 
-        ['环境影响评价报告', 'envReport'], 
-        ['环境自行监测方案', 'envScheme'],
-        ['突发环境应急预案', 'contingencyPlan'], 
-        ['备注', 'remark'], 
-        ['排污许可证状态', 'state']
-    ]:[
-        ['区域',  'a'] ,
-        ['公司名称',  'b',  2],
-        ['证书编号',  'c',  0],
-        ['组织机构代码',  'd',  0] ,
-        ['法定代表人',  'e',  1] ,
-        ['发证单位',  'f'] ,
-        ['主要污染物种类及限排污染物名称',  'g'] ,
-        ['排放方式',  'h'] ,
-        ['排放口数量(座)',  'i'] ,
-        ['排放口分布情况',  'j'] ,
-        ['设计规模',  'k'] ,
-        ['执行的污染物排放标准',  'l'] ,
-        ['主要污染物排放浓度限值',  'm'] ,
-        ['年度污染物排放限值',  'n'] ,
-        ['排污许可证发证日期',  'o'] ,
-        ['排污许可证有效期',  'p'] ,
-        ['排污许可备注',  'q'] ,
-        ['环境影响评价报告',  'r'] ,
-        ['环境自行监测方案',  's'] ,
-        ['突发环境应急预案',  't'] ,
-        ['备注',  'u'] ,
-        ['排污许可证状态',  'v'] 
-    ]
-    columns = columns.concat([['操作', 'action', {
+    let opt = [['操作', 'action', {
         renderButtons: (text,record) => {
             let btns = [];
                 // 查看
@@ -256,11 +245,133 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
                 })
             return btns
         }, width: '150px'
-    }]])
+    }]]
+    columns = [
+        [ '区域', 'regionalCompanyName' ],
+        [ '公司名称', 'waterFactoryName'],
+        [ '证书编号', 'permissionCode' ],
+        [ '组织机构代码', 'orgCode' ],
+        ['法定代表人', 'legalRepresentative'],
+        ['发证单位', 'issueUnit'],
+        ['主要污染物种类及限排污染物名称', 'mainContaminant'],
+        ['排放方式', 'emissionsWay'],
+        ['排放口数量(座)', 'dischargeOutletNum'],
+        ['排放口分布情况', 'dischargeOutletDistribution'],
+        ['设计规模', 'scale' ],
+        ['执行的污染物排放标准', 'exeStandard'],
+        ['主要污染物排放浓度限值', 'limitConcentrationVolume'],
+        ['年度污染物排放限值', 'yearLimitVolume'],
+        ['排污许可证发证日期', 'startDate'],
+        ['排污许可证有效期', 'endDate'], 
+        ['排污许可备注', 'permitRemark'], 
+        ['环境影响评价报告', 'envReport'], 
+        ['环境自行监测方案', 'envScheme'],
+        ['突发环境应急预案', 'contingencyPlan'], 
+        ['备注', 'remark'], 
+        ['排污许可证状态', 'state']
+    ]
+    columns = columns.concat(opt)
     
+    let columnsss = [
+        {
+            title: '区域',
+            dataIndex: 'regionalCompanyName',
+            key: 'regionalCompanyName',
+        },
+        {
+            title: '公司名称',
+            dataIndex: 'waterFactoryName',
+            key: 'waterFactoryName',
+        },
+        {
+            title: '填报日期',
+            dataIndex: 'date',
+            key: 'date',
+        },
+        {
+            title: '主要污染物种类',
+            dataIndex: 'mainContaminant',
+            key: 'mainContaminant',
+        },
+        {
+            title: '排污物名称',
+            dataIndex: 'name',
+            key: 'name',
+        },
+        {
+            title: '设计规模',
+            dataIndex: 'scale',
+            key: 'scale',
+        },
+        {
+            title: '执行的污染物排放标准',
+            dataIndex: 'exeStandard',
+            key: 'exeStandard',
+        },
+        {
+            title: '主要排污物排浓度限量',
+            dataIndex: 'limitConcentrationVolume',
+            key: 'limitConcentrationVolume',
+        },
+        {
+            title: '年度排污物排放值',
+            dataIndex: 'yearLimitVolume',
+            key: 'yearLimitVolume',
+        },
+        {
+            title: '排放水量(万吨)',
+            dataIndex: 'waterVolume',
+            key: 'waterVolume',
+        },
+        {
+            title: '排放水质指标浓度(mg/L)',
+            children: [
+                {
+                    title: 'COD',
+                    dataIndex: 'concentrationCod',
+                    key: 'concentrationCod',
+                }, {
+                    title: 'NH3-N',
+                    dataIndex: 'concentrationNh3n',
+                    key: 'concentrationNh3n',
+                }, {
+                    title: 'TN',
+                    dataIndex: 'concentrationTn',
+                    key: 'concentrationTn',
+                }, {
+                    title: 'TP',
+                    dataIndex: 'concentrationTp',
+                    key: 'concentrationTp',
+                }
+            ]
+        },
+        {
+            title: '排放水质指标污染量(t)',
+            children: [
+                {
+                    title: 'COD',
+                    dataIndex: 'pollutionCod',
+                    key: 'pollutionCod',
+                }, {
+                    title: 'NH3-N',
+                    dataIndex: 'pollutionNh3n',
+                    key: 'pollutionNh3n',
+                }, {
+                    title: 'TN',
+                    dataIndex: 'pollutionTn',
+                    key: 'pollutionTn',
+                }, {
+                    title: 'TP',
+                    dataIndex: 'pollutionTp',
+                    key: 'pollutionTp',
+                }
+            ]
+        },
+    ]
+    columnsss = columnsss.concat(handleColumns(opt))
     let vtxDatagridProps = {
         bordered:true,
-        columns: handleColumns(columns),
+        columns: searchParams.dataFillType==='produce'?handleColumns(columns):columnsss,
         scroll:{x:true},
         dataSource,
         indexColumn: true,
@@ -318,7 +429,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     const newItemProps = {
         updateWindow: updateNewWindow,
         modalProps: {
-            title: '排污许可证 > 新增',
+            title: searchParams.dataFillType==='produce'?'排污许可证 > 新增':'排污量填报 > 新增',
             visible: newItem.visible,
             onCancel: () => updateNewWindow(false),
             width: 900
@@ -328,7 +439,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
             sewageManagementId: searchParams.sewageManagementId,
             importError, showUploadModal,
             dataType:searchParams.dataFillType,
-            regionalCompanySelect,
+            regionalCompanySelect,waterFactorySelect,
             btnType: 'add',
             getList,
             updateState,
@@ -340,6 +451,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
                 })
             },
             save(dataStatus) {
+                console.log('dispatch保存')
                 dispatch({
                     type: 'sewageManagement/saveOrUpdate', payload: {
                         btnType: 'add',
@@ -347,7 +459,6 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
                         dataType: searchParams.dataFillType,
                         sewageManagementId: searchParams.sewageManagementId,
                         onSuccess: function () {
-                            message.success('填报辛苦了！');
                             updateNewWindow(false);
                         },
                         onError: function (msg) {
@@ -386,7 +497,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     const editItemProps = {
         updateWindow: updateEditWindow,
         modalProps: {
-            title: '数据填报 > 编辑',
+            title: searchParams.dataFillType==='produce'?'排污许可证 > 编辑':'排污量填报 > 编辑',
             visible: editItem.visible,
             onCancel: () => updateEditWindow(false),
             width: 900
@@ -394,8 +505,9 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         contentProps: {
             dataSource,
             ...editItem,
+            dataType:searchParams.dataFillType,
             sewageManagementId: searchParams.sewageManagementId,
-            importError, showUploadModal,regionalCompanySelect,
+            importError, showUploadModal,regionalCompanySelect,waterFactorySelect,
             btnType: 'edit',
             updateItem(obj) {
                 updateState({
@@ -407,13 +519,13 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
             save(dataStatus) {
                 dispatch({
                     type: 'sewageManagement/saveOrUpdate', payload: {
-                        btnType: 'add',
+                        btnType: 'edit',
                         onSuccess: function () {
-                            message.success('新增成功');
-                            updateNewWindow(false);
+                            message.success('编辑成功');
+                            updateEditWindow(false);
                         },
                         onError: function () {
-                            message.error('新增失败');
+                            message.error('编辑失败');
                         }
                     }
                 })
@@ -474,7 +586,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     const viewItemProps = {
         updateWindow: updateViewWindow,
         modalProps: {
-            title: '数据填报 > 查看',
+            title: searchParams.dataFillType==='produce'?'排污许可证 > 查看':'排污量填报 > 查看',
             visible: viewItem.visible,
             onCancel: () => updateViewWindow(false),
             width: 900
@@ -482,6 +594,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         contentProps: {
             ...viewItem,
             dataSource,
+            dataType:searchParams.dataFillType,
             btnType: 'view',
             updateChartItem(obj){
                 updateState({
@@ -612,21 +725,24 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     return (
         <div className={styles.normal}>
             <VtxGrid
-                titles={['区域', '公司']}
-                gridweight={[1, 1]}
+                titles={searchParams.dataFillType==='produce'?['区域', '公司']:['区域', '公司', '时间快速选择']}
+                gridweight={searchParams.dataFillType==='produce'?[1, 1]:[1, 1, 2]}
                 confirm={vtxGridParams.query}
                 clear={vtxGridParams.clear}
             >
-                <Select {...vtxGridParams.sewageManagementIdProps}>
-                    {sewageManagementSelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
+                <Select {...vtxGridParams.regionalCompanyIdProps}>
+                    {regionalCompanySelect.map(item => {
+                        return <Select.Option key={item.id}>{item.name}</Select.Option>
                     })}
                 </Select>
-                <Select {...vtxGridParams.sewageManagementIdProps}>
-                    {sewageManagementSelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
+                <Select {...vtxGridParams.waterFactoryIdProps}>
+                    {waterFactorySelect.map(i => {
+                        return <Select.Option key={i.id}>{i.name}</Select.Option>
                     })}
                 </Select>
+                {searchParams.dataFillType==='assay'?
+                    <VtxRangePicker {...vtxGridParams.startDateProps}/>:''
+                }
             </VtxGrid>
             <div className={styles.normal_body}>
                 
@@ -645,7 +761,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
                 </div>
                 <div className={styles.buttonContainer}>
                     {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
-                    {buttonLimit['DELETE'] && <Button icon="delete" disabled={selectedRowKeys.length == 0 || canDelete()} onClick={deleteItems}>删除</Button>}
+                    {buttonLimit['DELETE'] && <Button icon="delete" onClick={deleteItems}>删除</Button>}
                     <Button icon='download' onClick={() => { window.open(`/cloud/gzzhsw/api/cp/data/fill/exportExcel?sewageManagementId=${searchParams.sewageManagementId}&dataFillType=${searchParams.dataFillType}&tenantId=${VtxUtil.getUrlParam('tenantId')}`) }}>模版下载</Button>
                     {buttonLimit['EXPORT'] &&<VtxExport2  {...exportProps}>
                         <Button icon="export">导出</Button>

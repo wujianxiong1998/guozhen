@@ -37,7 +37,21 @@ class ADD extends React.Component {
         ]
     }
     searchHistory = (id, type, data) => {
+        const { contentProps } = this.props
+        const { searchHistoryData } = contentProps
         this.setState({ historyModalVisible: true, title: type })
+        switch(type) {
+            case '保底水量': type= 'minWaterFlow';break;
+            case '收费水量': type= 'feeWaterFlow';break;
+            case '水价': type= 'waterPrice';break;
+        }
+        searchHistoryData({
+            id,
+            type,
+            tenantId: VtxUtil.getUrlParam('tenantId'),
+            page: 0,
+            size: 10
+        })
     }
 
     render() {
@@ -49,54 +63,36 @@ class ADD extends React.Component {
         } = contentProps;
         const { mapModalVisible, historyModalVisible, title  } = this.state;
 
-        const { updateItem } = contentProps;
+        const { updateItem, historyChange, modalCurrentPage, modalPageSize, modalTotal, modalLoading } = contentProps;
         const searchMap = () => {
             this.setState({ mapModalVisible: true })
         }
         
-        
-        // mock数据
-        let columns = [
-            { dataIndex: 'one', title: '保底水量', key: 'one' },
-            { dataIndex: 'two', title: '日期', key: 'two' }
-        ]
-        let dataSource = [
-            { one: '制作', two: '2020-9-28', three: '3', four: '4' },
-            { one: '制作', two: '2020-9-28', three: '3', four: '4' },
-            { one: '制作', two: '2020-9-28', three: '3', four: '4' },
-            { one: '制作', two: '2020-9-28', three: '3', four: '4' },
-            { one: '制作', two: '2020-9-28', three: '3', four: '4' },
-            { one: '制作', two: '2020-9-28', three: '3', four: '4' },
-        ]
-        let currentPage = 1
-        let pageSize = 10
-        let loading = false
-        let total = 4
 
+        let columns = [
+            { dataIndex: 'volume', title: '保底水量', key: 'volume' },
+            { dataIndex: 'date', title: '日期', key: 'date' }
+        ]
+        let dataSource = historyData
+        
         let vtxDatagridProps = {
             width: 800,
             columns,
             dataSource,
             indexColumn: true,
-            startIndex: (currentPage - 1) * pageSize + 1,
-            loading,
-            onChange(pagination, filters, sorter) {
-                dispatch({
-                    type: 'basicInformation/getList',
-                    payload: {
-                        currentPage: pagination.current,
-                        pageSize: pagination.pageSize
-                    }
-                })
+            startIndex: (modalCurrentPage - 1) * modalPageSize + 1,
+            loading: modalLoading,
+            onChange(pagination,  filters, sorter) {
+                historyChange(pagination)
             },
             pagination: {
                 showSizeChanger: true,
                 pageSizeOptions: ['10', '20', '30', '40', '50'],
                 showQuickJumper: true,
-                current: currentPage,
-                total: total,
-                pageSize,
-                showTotal: total => `合计 ${total} 条`
+                current: modalCurrentPage,
+                total: modalTotal,
+                pageSize:modalPageSize,
+                showTotal: modalTotal => `合计 ${modalTotal} 条`
             },
         };
         return (
@@ -411,7 +407,7 @@ class ADD extends React.Component {
                                 data-modallist={{
                                     layout:{
                                         comType: 'input',
-                                        require: true,
+                                        require: false,
                                         name: '收费水量',
                                         width: '80',
                                         key: 'feeWaterFlow',

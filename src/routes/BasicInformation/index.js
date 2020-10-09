@@ -21,7 +21,7 @@ function BasicInformation({ dispatch, basicInformation, common, accessControlM }
         searchParams,
         businessUnitSelect, regionalCompanySelect, businessSelect, processTypeSelect, productTypeSelect,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys,
-        newItem, editItem, viewItem, historyData
+        newItem, editItem, viewItem, historyData,modalQueryParams, modalCurrentPage,modalLoading, modalPageSize, modalTotal
     } = basicInformation;
     let buttonLimit = {};
     if (accessControlM['waterFactory'.toLowerCase()]) {
@@ -288,6 +288,7 @@ function BasicInformation({ dispatch, basicInformation, common, accessControlM }
             },
             ...editItem,
             historyData,
+            modalCurrentPage, modalPageSize, modalTotal,
             businessUnitSelect, regionalCompanySelect,
             businessSelect, processTypeSelect, productTypeSelect,
             btnType: 'edit',
@@ -295,6 +296,21 @@ function BasicInformation({ dispatch, basicInformation, common, accessControlM }
                 updateState({
                     editItem: {
                         ...obj
+                    }
+                })
+            },
+            searchHistoryData(obj) {
+                let {id,page,size,tenantId,type} = obj
+                dispatch({
+                    type: 'basicInformation/getHistory', payload: {id,modalCurrentPage,modalPageSize,tenantId,type}
+                })
+            },
+            historyChange(pagination) {
+                dispatch({
+                    type: 'basicInformation/getHistory',
+                    payload: {
+                        modalCurrentPage: pagination.current,
+                        modalPageSize: pagination.pageSize
                     }
                 })
             },
@@ -333,7 +349,8 @@ function BasicInformation({ dispatch, basicInformation, common, accessControlM }
         },
         contentProps: {
             ...viewItem,
-            btnType: 'view'
+            btnType: 'view',
+            
         }
     };
 

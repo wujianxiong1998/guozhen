@@ -1,6 +1,10 @@
-import {  auditSewageManagement, saveSewageManagement, getSewageManagementDetail,deleteSewageManagement,
-    getDefaultSewageManagement, ifExistSewageManagement, getSevenDayData, isAdministrator, getSewageManagementList } from '../services/sewageService';
-import { loadWaterFactorySelect, calculateTargetValue, calculateConsumeTargetValue} from '../services/remoteData'
+import {  getPerformanceTableDetail,deletePerformanceTable,
+ isAdministrator, getPipelineList,getSewageReport,getPerformanceReport }
+ from '../services/performanceTable.js';
+
+import { loadWaterFactorySelect, loadRegionalCompanySelect,addPipeline,updatePipeline,
+    addSewage,updateSewage,
+} from '../services/remoteData'
 import {message} from 'antd'
 const u = require('updeep');
 import moment from 'moment'
@@ -11,7 +15,11 @@ import { VtxUtil } from '../utils/util';
 let initQueryParams = {
     regionalCompanyId: '',
     waterFactoryId: '',
+    projectName: '',
+    startTime: moment().format('YYYY-MM-DD'), // 开始时间
+    endTime: moment().format('YYYY-MM-DD'),// 结束时间
 };
+
 // 新增参数
 let defaultNewItem = {
     editType: 'edit',
@@ -23,10 +31,11 @@ const initState = {
     isAdministrator:false,//是否为管理员
     searchParams : {...initQueryParams}, // 搜索参数
     queryParams : {...initQueryParams}, // 查询列表参数
-    sewageManagementSelect : [], // 水厂下拉数据
+    regionalCompanySelect : [], // 区域公司下拉数据
+    waterFactorySelect: [], // 公司下拉
+    performanceTableSelect : [], // 水厂下拉数据
     currentPage : 1, // 页码
     pageSize : 10, // 每页条数
-    title:[],
     loading : false, // 列表是否loading
     dataSource : [], // 列表数据源
     total : 0, // 列表总条数
@@ -77,6 +86,7 @@ export default {
                     dispatch({ type: 'isAdministrator' });
                     // 请求水厂下拉数据
                     dispatch({type : 'loadWaterFactorySelect'});
+                    dispatch({type : 'loadRegionalCompanySelect'});
                     dispatch({type : 'getList'});
                 }
             })
@@ -98,33 +108,9 @@ export default {
                 })
             }
         },
-        // 水厂下拉
-        *loadWaterFactorySelect({ payload }, { call, put, select }) {
-            yield put({ type: 'updateState', payload: { loading: true } });
-            const { data } = yield call(loadWaterFactorySelect,{
-                isControlPermission:'1'
-            });
-            yield put({ type: 'updateState', payload: { loading: false } });
-            if(!!data && !data.result) {
-                if('data' in data && Array.isArray(data.data)&&data.data[0]) {
-                    yield put({
-                        type : 'updateState',
-                        payload : {
-                            sewageManagementSelect : data.data,
-                            searchParams:{
-                                sewageManagementId:data.data[0].id
-                            }
-                        }
-                    })
-                    VtxUtil.delay(10)
-                    yield put({ type: 'updateQueryParams' })
-                    yield put({type:'getList'})
-                }
-            }
-        },
 
-        // 获取列表
         *getList({ payload = {} }, { call, put, select }) {
+            
             yield put({ type : 'updateState', payload : {loading : true} });
             let {
                 pageSize, currentPage, queryParams, searchParams
@@ -136,82 +122,33 @@ export default {
                 page : currentPage-1,
                 size : pageSize
             };
-            const { data } = yield call(getSewageManagementList, VtxUtil.submitTrim(params));
-            let dataSource = [], total = 0, title = [],status = false;
+            let callObj;
+            switch(searchParams.dataFillType) {
+                case 'produce': callObj=getPipelineList;break;
+                case 'assay': callObj=getSewageReport;break;
+                case 'third': callObj=getPerformanceReport;break;
+            }
+            const { data } = yield call(callObj, VtxUtil.submitTrim(params));
+            let dataSource = [], total = 0, status = false;
             if(!!data && !data.result) {
-                if ('data' in data && Array.isArray(data.data.resultList.rows) && Array.isArray(data.data.titleName)) {
-                    const result = data.data;
+                if('data' in data && Array.isArray(data.data.rows)) {
                     status = true;
-                    dataSource = result.resultList.rows;
-                    total = result.resultList.total;
-                    title = result.titleName;
-                    if (result.titleName && result.titleName.length === 0) {
-                        message.warn('该水厂未配置指标')
-                    }
+                    dataSource = data.data.rows.map(item => ({
+                        ...item, 
+                        key : item.id
+                    }));
+                    total = data.data.total;
                 }
             }
-                dataSource = [
-                    { a: '制作', b: '2020-9-28', c: '3', d: '4', e: '5', f: '6', g: '7', h: '8', i: '9', j: '10', k: '11', l: '12', m: '13', n: '14', o: '15', p: '16', q: '17', r: '18', s: '19', t: '20', s: '21', t: '22', u: '23', v: '24' },
-                    { a: '制作', b: '2020-9-28', c: '3', d: '4', e: '5', f: '6', g: '7', h: '8', i: '9', j: '10', k: '11', l: '12', m: 'ss', n: '14', o: 'av', p: '16', q: '17', r: 'ss', s: '19', t: '20', s: '21', t: '22', u: 'ww', v: 'qq' },
-                ]
-                title = [
-                    { value: '区域', key: 'a' },
-                    { value: '公司名称', key: 'b' },
-                    { value: '证书编号', key: 'c' },
-                    { value: '组织机构代码', key: 'd' },
-                    { value: '法定代表人', key: 'e' },
-                    { value: '发证单位', key: 'f' },
-                    { value: '主要污染物种类及限排污染物名称', key: 'g' },
-                    { value: '排放方式', key: 'h' },
-                    { value: '排放口数量(座)', key: 'i' },
-                    { value: '排放口分布情况', key: 'j' },
-                    { value: '设计规模', key: 'k' },
-                    { value: '执行的污染物排放标准', key: 'l' },
-                    { value: '主要污染物排放浓度限值', key: 'm' },
-                    { value: '年度污染物排放限值', key: 'n' },
-                    { value: '排污许可证发证日期', key: 'o' },
-                    { value: '排污许可证有效期', key: 'p' },
-                    { value: '排污许可备注', key: 'q' },
-                    { value: '环境影响评价报告', key: 'r' },
-                    { value: '环境自行监测方案', key: 's' },
-                    { value: '突发环境应急预案', key: 't' },
-                    { value: '备注', key: 'u' },
-                    { value: '排污许可证状态', key: 'v' }
-                ]
-            if(searchParams.dataFillType !== 'produce') {
-                dataSource = [
-                    { a: '制作', b: '2020-9-28', c: '3', d: '4', e: '5', f: '6', g: '7', h: '8', i: '9', j: '10', k: '11', l: '12', m: '13', n: '14', o: '15', p: '16', q: '17', r: '18', s: '19', t: '20', s: '21', t: '22', u: '23', v: '24' },
-                    { a: '制作', b: '2020-9-28', c: '3', d: '4', e: '5', f: '6', g: '7', h: '8', i: '9', j: '10', k: '11', l: '12', m: 'ss', n: '14', o: 'av', p: '16', q: '17', r: 'ss', s: '19', t: '20', s: '21', t: '22', u: 'ww', v: 'qq' },
-                    { a: '制作', b: '2020-9-28', c: '3', d: '4', e: '5', f: '6', g: '7', h: '8', i: '9', j: '10', k: '11', l: '12', m: 'ss', n: '14', o: 'av', p: '16', q: '17', r: 'ss', s: '19', t: '20', s: '21', t: '22', u: 'ww', v: 'qq' },
-                ]
-                title = [
-                    { value: '区域', key: 'a',render: (text, record, index)=>{ return (<tr><td>1111</td><td>222</td></tr>) } },
-                    { value: '公司名称', key: 'b',colSpan: 2 },
-                    { value: '证书编号', key: 'c',colSpan: 0 },
-                    { value: '组织机构代码', key: 'd',colSpan: 0 },
-                    { value: '法定代表人', key: 'e',colSpan: 1 },
-                    { value: '发证单位', key: 'f' },
-                    { value: '主要污染物种类及限排污染物名称', key: 'g' },
-                    { value: '排放方式', key: 'h' },
-                    { value: '排放口数量(座)', key: 'i' },
-                    { value: '排放口分布情况', key: 'j' },
-                    { value: '设计规模', key: 'k' },
-                    { value: '执行的污染物排放标准', key: 'l' },
-                    { value: '主要污染物排放浓度限值', key: 'm' },
-                    { value: '年度污染物排放限值', key: 'n' },
-                    { value: '排污许可证发证日期', key: 'o' },
-                    { value: '排污许可证有效期', key: 'p' },
-                    { value: '排污许可备注', key: 'q' },
-                    { value: '环境影响评价报告', key: 'r' },
-                    { value: '环境自行监测方案', key: 's' },
-                    { value: '突发环境应急预案', key: 't' },
-                    { value: '备注', key: 'u' },
-                    { value: '排污许可证状态', key: 'v' }
-                ]
+            console.log(dataSource)
+            if(searchParams.dataFillType==='produce') {
+                dataSource.forEach(item=>{
+                    item.envReport = item.envReport===true?'有':'无'
+                    item.envScheme = item.envScheme===true?'有':'无'
+                    item.contingencyPlan = item.contingencyPlan===true?'有':'无'
+                })
             }
-            
             let uState = {
-                title,
                 dataSource,
                 total,
                 loading : false
@@ -223,10 +160,11 @@ export default {
                 payload : {...uState}
             })
         },
+           
         //获取详情
         *getDetail({ payload }, { call, put, select }) {
             const { id, itemName,dateValue } = payload
-            const { data } = yield call(getSewageManagementDetail, {
+            const { data } = yield call(getPerformanceTableDetail, {
                 id,
                 dateValue
             })
@@ -244,33 +182,39 @@ export default {
                 }
             }
         },
-        //获取初始填报数据
-        *getDefaultSewageManagement({ payload }, { call, put, select }) {
-            const { queryParams, sewageManagementSelect  } = yield select(({ performanceTable }) => performanceTable)
-            const { sewageManagementId, dataFillType } = queryParams
-            const sewageManagement = _find(sewageManagementSelect, { id: sewageManagementId })
-            const { data } = yield call(getDefaultSewageManagement, {
-                sewageManagementId,
-                dataFillType
-            })
-            if (!!data && data.result == 0) {
-                if ('data' in data && Array.isArray(data.data.targetLibraryList)) {
+     
+        // 区域公司下拉
+        *loadRegionalCompanySelect({ payload }, { call, put, select }) {
+            const { data } = yield call(loadRegionalCompanySelect);
+            if(!!data && !data.result) {
+                if('data' in data && Array.isArray(data.data)) {
                     yield put({
-                        type: 'updateState',
-                        payload: {
-                            newItem: {
-                                sewageManagementName: sewageManagement.name,
-                                fillData: data.data.targetLibraryList.map((item, index) => ({
-                                    ...item,
-                                    key: item.id
-                                }))
-                            }
+                        type : 'updateState',
+                        payload : {
+                            regionalCompanySelect : data.data
                         }
                     })
                 }
             }
         },
-        // 新增or编辑
+
+        // 公司下拉
+        *loadWaterFactorySelect({ payload }, { call, put, select }) {
+            const { data } = yield call(loadWaterFactorySelect);
+            if(!!data && !data.result) {
+                if('data' in data && Array.isArray(data.data)) {
+                    yield put({
+                        type : 'updateState',
+                        payload : {
+                            waterFactorySelect : data.data
+                        }
+                    })
+                }
+            }
+        },
+
+
+
         *saveOrUpdate({ payload }, { call, put, select }) {
         	yield put({
                 type : 'updateState',
@@ -278,46 +222,81 @@ export default {
                     [payload.btnType === 'add' ? 'newItem' : 'editItem'] : { loading : true }
                 }
             });
-            const { dataStatus, dataType, sewageManagementId} = payload
+            const { dataStatus, dataType, performanceTableId} = payload
             const { newItem, editItem } = yield select( ({performanceTable}) => performanceTable );
             const {
-                id, dateValue,fillData
+                id, dateValue,fillData,
+                regionalCompanyName,regionalCompanyId ,waterFactoryName,waterFactoryId,permissionCode,
+                orgCode,legalRepresentative,issueUnit,
+                mainContaminant,emissionsWay,dischargeOutletNum,
+                dischargeOutletDistribution,scale,exeStandard,
+                limitConcentrationVolume,yearLimitVolume,startDate,
+                endDate,permitRemark,envReport,envScheme,contingencyPlan,
+                state, permission,username,password,
+                concentrationCod,concentrationNh3n,concentrationTn,concentrationTp,date,name,pollutionCod,pollutionNh3n,
+                pollutionTn,pollutionTp,
+                waterVolume,
+                 // 管网业绩表
+                 middleWaterPipeline, projectName, projectType, projectTypeStr,
+                 rainWaterPump, rainwaterPipeline, pipeNet,
+                 remark, sewagePipeline, sewagePump, waterSupplyPipeline,
+                 // 污水厂汇总表
+                 address, bottomWater, chargingModel, contractEndTime, contractStartTime,
+                 designProcess, designScale, operationTime, operationTimeStr, operationYear,
+                 price,  projectTypeOne, projectTypeThree, projectTypeTwo, waterTarget
             } = payload.btnType === 'add' ? newItem : editItem;
-            if(payload.btnType==='add'){
-                const { data: checkData } = yield call(ifExistSewageManagement,{
-                    dateValue, sewageManagementId,
-                    dataFillType:dataType
-                })
-                if (!!checkData && checkData.result == 0 && checkData.data) {//可以新增
-                    let params = {
-                        id, dateValue, dataStatus, dataType,
-                        dataFillDetailJson: JSON.stringify(fillData),
-                        sewageManagementId,
-                        tenantId: VtxUtil.getUrlParam('tenantId')
-                    };
-                    const { data } = yield call(saveSewageManagement, VtxUtil.submitTrim(params));
-                    if (!!data && data.result == 0) {
-                        yield put({ type: 'getList' });
-                        payload.onSuccess();
-                    } else {
-                        payload.onError(data ? data.msg : '保存失败');
-                    }
-                }else{
-                    message.warn('该水厂在当天已进行过填报！')
-                }
-            }else{
-                let params = {
-                    id, dateValue, dataStatus, dataType,
-                    dataFillDetailJson: JSON.stringify(fillData),
-                    sewageManagementId,
-                    tenantId: VtxUtil.getUrlParam('tenantId')
-                };
-                const { data } = yield call(saveSewageManagement, VtxUtil.submitTrim(params));
-                if (!!data && data.result == 0) {
-                    yield put({ type: 'getList' });
+            let params = {
+                regionalCompanyId,waterFactoryId,permissionCode,
+                orgCode,legalRepresentative,issueUnit,
+                mainContaminant,emissionsWay,dischargeOutletNum,
+                dischargeOutletDistribution,scale,exeStandard,
+                limitConcentrationVolume,yearLimitVolume,startDate,
+                endDate,permitRemark,envReport,envScheme,contingencyPlan,
+                remark,state,permission,username,password,
+                concentrationCod,concentrationNh3n,concentrationTn,concentrationTp,date,name,pollutionCod,pollutionNh3n,
+                pollutionTn,pollutionTp,
+                waterVolume,
+                 // 管网业绩表
+                 middleWaterPipeline, projectName, projectType, projectTypeStr,
+                 rainWaterPump, rainwaterPipeline, 
+                 remark, sewagePipeline, sewagePump, waterSupplyPipeline,pipeNet,
+                 // 污水厂汇总表
+                 address, bottomWater, chargingModel, contractEndTime, contractStartTime,
+                 designProcess, designScale, operationTime, operationTimeStr, operationYear,
+                 price,  projectTypeOne, projectTypeThree, projectTypeTwo, waterTarget,
+                tenantId: VtxUtil.getUrlParam('tenantId')
+            };
+            if(payload.btnType === 'edit') {
+                params.id = id
+            }
+            console.log('dataType=', dataType)
+            if(dataType==='produce') {
+                console.log(payload.btnType)
+                const { data } = yield call( payload.btnType === 'add' ? 
+                addPipeline : updatePipeline, VtxUtil.submitTrim(params));
+                if(!!data && data.result == 0) {
+                    yield put({type:'getList'});
                     payload.onSuccess();
                 } else {
-                    payload.onError(data ? data.msg : '保存失败');
+                    payload.onError();
+                }
+            } else if(dataType==='assay') {
+                const { data } = yield call( payload.btnType === 'add' ? 
+                addSewage : updateSewage, VtxUtil.submitTrim(params));
+                if(!!data && data.result == 0) {
+                    yield put({type:'getList'});
+                    payload.onSuccess();
+                } else {
+                    payload.onError();
+                }
+            } else if (dataType==='third') {
+                const { data } = yield call( payload.btnType === 'add' ? 
+                addSewage : updateSewage, VtxUtil.submitTrim(params));
+                if(!!data && data.result == 0) {
+                    yield put({type:'getList'});
+                    payload.onSuccess();
+                } else {
+                    payload.onError();
                 }
             }
             
@@ -327,119 +306,24 @@ export default {
                     [payload.btnType === 'add' ? 'newItem' : 'editItem'] : { loading : false }
                 }
             });
+
         },
-        //审核
-        *handleAudit({ payload }, { call, put, select }) {
-            const { operateType } = payload
-            const { id, auditMemo, dateValue  } = yield select(({ performanceTable }) => performanceTable.viewItem);
-            yield put({
-                type: 'updateState',
-                payload: {
-                    viewItem: {
-                        loading: true
-                    }
-                }
-            })
-            const { data } = yield call(auditSewageManagement, {
-                id,
-                auditMemo,
-                dateValue,
-                operateType
-            })
-            yield put({
-                type: 'updateState',
-                payload: {
-                    viewItem: {
-                        loading: false
-                    }
-                }
-            })
-            if (!!data && data.result == 0) {
-                yield put({ type: 'getList' });
-                payload.onSuccess();
-            } else {
-                payload.onError(data ? data.msg : '提交审核失败');
-            }
-        },
-        // 获取近七天数据
-        *getSevenDayData({ payload }, { call, put, select }) {
-            const { dateValue, sewageManagementId, libraryId } = payload
-            const {data} = yield call(getSevenDayData,{
-                dateValue, sewageManagementId, libraryId
-            })
-            if(data&&!data.result){
-                yield put({
-                    type:'updateState',
-                    payload:{
-                        chartItem:{
-                            xList:data.data.xData,
-                            data:data.data.yData
-                        }
-                    }
-                })
-            }
-        },
+
         // 删除
         *deleteItems({ payload }, { call, put, select }) {
-            const { queryParams } = yield select(({ performanceTable }) => performanceTable)
+            const { queryParams, searchParams } = yield select(({ performanceTable }) => performanceTable)
             const { startTime,endTime} = queryParams
             let { ids = [] } = payload;
             const params = {
                 ids : ids.join(','),
                 startTime, endTime
             };
-            const { data } = yield call(deleteSewageManagement, params);
+            const { data } = yield call(deletePerformanceTable, params, searchParams);
             if(!!data && data.result==0){
                 payload.onSuccess(ids);
             }
             else{
                 payload.onError( data ? data.msg : '删除失败' );
-            }
-        },
-        //计算非原始指标
-        *calculateTargetValue({ payload = {} }, { call, put, select }) {
-            const {itemName} = payload
-            const { fillData } = yield select(({ performanceTable }) => performanceTable[itemName]);
-            const { data } = yield call(calculateTargetValue, {
-                tenantId: VtxUtil.getUrlParam('tenantId'),
-                dataFillDetailJson: JSON.stringify(fillData)
-            });
-            if(data&&!data.result){
-                if ('data' in data && Array.isArray(data.data)) {
-                    yield put({
-                        type: 'updateState',
-                        payload: {
-                            [itemName]: {
-                                fillData:data.data
-                            }
-                        }
-                    })
-                }
-            }
-        },
-        //计算单耗非原始指标
-        *calculateConsumeTargetValue({ payload = {} }, { call, put, select }) {
-            const { itemName } = payload
-            const { queryParams } = yield select(({ performanceTable }) => performanceTable);
-            const { sewageManagementId } = queryParams
-            const { fillData, dateValue } = yield select(({ performanceTable }) => performanceTable[itemName]);
-            const { data } = yield call(calculateConsumeTargetValue, {
-                tenantId: VtxUtil.getUrlParam('tenantId'),
-                fillDate:dateValue,
-                sewageManagementId,
-                zhswDataFillDetailDTOS: fillData
-            });
-            if (data && !data.result) {
-                if ('data' in data && Array.isArray(data.data)) {
-                    yield put({
-                        type: 'updateState',
-                        payload: {
-                            [itemName]: {
-                                fillData: data.data
-                            }
-                        }
-                    })
-                }
             }
         },
     },
@@ -461,21 +345,13 @@ export default {
         },
 
         initQueryParams(state,action) {
-            const { sewageManagementSelect} =state
-            const firstWaterFactory = sewageManagementSelect[0].id
             return {
                 ...state,
                 ...action.payload,
                 currentPage : 1,
                 pageSize : 10,
-				 searchParams : {
-                     ...initQueryParams,
-                     sewageManagementId: firstWaterFactory
-                },
-                queryParams: {
-                    ...initQueryParams,
-                    sewageManagementId: firstWaterFactory
-                },
+				 searchParams : initQueryParams,
+                queryParams : initQueryParams
             }
         },
 

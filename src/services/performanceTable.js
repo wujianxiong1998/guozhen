@@ -53,24 +53,32 @@ export async function ifExistProductionPlan(params) {
 }
 //--------------------------数据填报-----------------------------
 
-//分页
-export async function getSewageManagementList(param) {
-    return request('/cloud/gzzhsw/api/cp/water/sewageDischargePermission/page', {
+//分页(管网)
+export async function getPipelineList(param) {
+    return request('/cloud/gzzhsw/api/cp/basic/pipelineNetPerformance/page.smvc', {
         method: 'get',
         body: param,
     })
 }
 
-//分页
+//分页（污水厂
 export async function getSewageReport(param) {
-    return request('/cloud/gzzhsw/api/cp/water/sewageDischargeReport/page', {
+    return request('/cloud/gzzhsw/api/cp/basic/sewageFactory/page.smvc', {
+        method: 'get',
+        body: param,
+    })
+}
+
+//分页（业绩汇总
+export async function getPerformanceReport(param) {
+    return request('/cloud/gzzhsw/api/cp/basic/PerformanceSummary/page.smvc', {
         method: 'get',
         body: param,
     })
 }
 
 //删除
-export async function deleteSewageManagement(param, searchParams) {
+export async function deletePerformanceTable(param, searchParams) {
     if(searchParams.dataFillType==='produce') {
         return request(`/cloud/gzzhsw/api/cp/water/sewageDischargePermission/delete`, {
             method: 'post',
@@ -89,35 +97,35 @@ export async function deleteSewageManagement(param, searchParams) {
 }
 
 //修改
-export async function saveSewageManagement(param) {
+export async function savePerformanceTable(param) {
     return requestJson('/cloud/gzzhsw/api/cp/data/fill/saveOrUpdate.smvc', {
         method: 'post',
         body: param,
     })
 }
 //获取填报数据初始数据
-export async function getDefaultSewageManagement(param) {
+export async function getDefaultPerformanceTable(param) {
     return request('/cloud/gzzhsw/api/cp/data/fill/get.smvc', {
         method: 'post',
         body: param,
     })
 }
 //获取详情
-export async function getSewageManagementDetail(param) {
+export async function getPerformanceTableDetail(param) {
     return request('/cloud/gzzhsw/api/cp/data/fill/view.smvc', {
         method: 'post',
         body: param,
     })
 }
 //审核
-export async function auditSewageManagement(params) {
+export async function auditPerformanceTable(params) {
     return request(`/cloud/gzzhsw/api/cp/data/fill/audit.smvc`, {
         method: 'post',
         body: params
     });
 }
 //验重
-export async function ifExistSewageManagement(params) {
+export async function ifExistPerformanceTable(params) {
     return request(`/cloud/gzzhsw/api/cp/data/fill/ifExitRecord.smvc`, {
         method: 'post',
         body: params
