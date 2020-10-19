@@ -85,7 +85,7 @@ class Detail extends React.Component {
                 </Row>
                 <Row>
                     <Col span={11}>
-                        <FormItem {...formStyle_8} label="生产厂家">
+                        <FormItem {...formStyle_8} label="品牌">
                             {getFieldDecorator('manufacturer', {
                                 initialValue: detail.manufacturer,
                                 rules: [

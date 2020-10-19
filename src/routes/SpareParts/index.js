@@ -66,7 +66,7 @@ class SpareParts extends React.Component {
                 key: 'usedBy',
                 nowrap: true
             }, {
-                title: '生产厂家',
+                title: '品牌',
                 dataIndex: 'manufacturer',
                 key: 'manufacturer',
                 nowrap: true
