@@ -122,6 +122,10 @@ const routes = [
         path: '/dataFillStatistics',
         models: () => [import('./models/dataFillStatisticsM')],
         component: () => import('./routes/DataFillStatistics'),
+    }, {//信息稽查--在线运维
+        path: '/onlineOperation',
+        models: ()=> [import('./models/onlineOperationM'), import('./models/common/accessControlM')],
+        component: ()=> import('./routes/OnlineOperation')
     }, {//信息稽查--生产月报
         path: '/productionMonthReport',
         models: () => [import('./models/productionMonthReportM')],

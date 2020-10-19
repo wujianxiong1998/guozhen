@@ -1,6 +1,6 @@
 import { getTargetConfigList,addTargetConfig,updateTargetConfig,commonDelete,
     loadBusinessUnitSelect, loadRegionalCompanySelect, loadWaterFactorySelect, getTargetTemplateSelect,
-    getTargetsByTemplateId } from '../services/remoteData';
+    getTargetsByTemplateId, getTargetConfigTree } from '../services/remoteData';
 
 const u = require('updeep');
 import _find from 'lodash/find';
@@ -13,6 +13,8 @@ let initQueryParams = {
     businessUnitId : '', // 事业部
     regionalCompanyId : '', // 区域公司
     typeCode: 'JHZB',//指标类型--页签
+    businessName: '',
+    waterFactoryId : ''
 };
 
 // 新增参数
@@ -45,7 +47,9 @@ const initState = {
     },
     viewItem: { // 查看参数
         visible:false
-    }
+    },
+    treeDatas: {}, //树
+    isToggle: false
 };
 
 export default {
@@ -65,6 +69,8 @@ export default {
                             ...initState
                         }
                     })
+                    // 获取树
+                    dispatch({ type: 'getTree'})
                     // 请求事业部下拉数据
                     dispatch({type : 'loadBusinessUnitSelect'});
                     // 请求区域公司下拉数据
@@ -79,6 +85,21 @@ export default {
     },
 
     effects : {
+        // 树
+        *getTree({payload}, {call, put, select}) {
+            const {data} = yield call(getTargetConfigTree);
+            // if(!!data && !data.result) {
+            //     if('data' in data) {
+                    yield put({
+                        type: 'updateState',
+                        payload: {
+                            treeDatas: data.data
+                        }
+                    })
+                // }
+            // }
+        },
+
         // 事业部下拉
         *loadBusinessUnitSelect({ payload }, { call, put, select }) {
             const { data } = yield call(loadBusinessUnitSelect);

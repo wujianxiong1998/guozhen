@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import {Form, Row, Col, Input, Select, DatePicker, Radio, InputNumber} from 'antd';
+import {Form, Row, Col, Input, Select, DatePicker, Radio, InputNumber, Button} from 'antd';
 import {VtxCombogrid, VtxUpload} from 'vtx-ui';
 import 'moment/locale/zh-cn';
 import {formStyle_8, formStyle_4, PositiveInteger, emptyInput} from '../../../utils/util';
@@ -31,10 +31,10 @@ export default class BaseInfo extends React.Component {
             }
         }
     }
-    
+
     render() {
         const {getFieldDecorator, setFieldsValue, setFields, getFieldValue, type, detail, checkName, equipmentStatus, equipmentTypes, waterFactoryList, structureList, getStructuresList, equipmentGrades, manufacturerList, equipmentSelect, getManufacturerList, changeDetail} = this.props;
-        
+        const {handleCopy, handlePaste} = this.props
         //选择水厂
         const waterFactorySelect = {
             style: {width: '100%'},
@@ -104,24 +104,38 @@ export default class BaseInfo extends React.Component {
                 }).filter(item => !!item).join(','))
             },
         };
-        
+        console.log(detail)
         return (
             <div>
-                {type !== 'add' && <div className='ant-form' style={{width: '75%'}}>
+                {(type !== 'view' && type !== 'examine') && <div style={{overflow: 'hidden', marginBottom: '10px'}}>
+                    <Button type='primary'
+                            style={{float: 'right', marginLeft: '10px'}}
+                            onClick={handlePaste}
+                    >粘贴</Button>
+                    <Button type='primary'
+                            style={{float: 'right'}}
+                            onClick={handleCopy}
+                    >复制</Button>
+                </div>}
+
+                <div className='ant-form' style={{width: '75%'}}>
                     <Row>
+                        {/* 设备编码 */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="设备编码">
                                 {getFieldDecorator('code', {
-                                    initialValue: detail.code
+                                    initialValue: detail.code,
+                                    rules: [
+                                        {required: true, whitespace: true, message: '必填项'}
+                                    ]
                                 })(
-                                    <Input disabled/>
+                                    <Input disabled={type === 'view'}/>
                                 )}
                             </FormItem>
                         </Col>
                     </Row>
-                </div>}
-                <div className='ant-form' style={{width: '75%'}}>
                     <Row>
+                        {/* 设备名称rrrrrr */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="设备名称">
                                 {getFieldDecorator('name', {
@@ -135,6 +149,7 @@ export default class BaseInfo extends React.Component {
                                 )}
                             </FormItem>
                         </Col>
+                        {/* 设备类型rrrrrrr */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="设备类型">
                                 {getFieldDecorator('typeId', {
@@ -151,6 +166,7 @@ export default class BaseInfo extends React.Component {
                                 )}
                             </FormItem>
                         </Col>
+                        {/* 设备型号rrrrr */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="设备型号">
                                 {getFieldDecorator('modelNum', {
@@ -165,6 +181,7 @@ export default class BaseInfo extends React.Component {
                         </Col>
                     </Row>
                     <Row>
+                        {/* 设备状态rrrrrrr */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="设备状态">
                                 {getFieldDecorator('deviceStatus', {
@@ -181,22 +198,20 @@ export default class BaseInfo extends React.Component {
                                 )}
                             </FormItem>
                         </Col>
+                        {/* 投运时间rrrrrr */}
                         <Col span={7}>
-                            <FormItem {...formStyle_8} label="所属水厂">
-                                {getFieldDecorator('waterFactoryName', {
-                                    initialValue: detail.waterFactoryName,
+                            <FormItem {...formStyle_8} label="投运时间">
+                                {getFieldDecorator('operationDate', {
+                                    initialValue: !!detail.operationDate ? moment(detail.operationDate) : null,
                                     rules: [
-                                        {required: true, message: '必填项'}
+                                        {required: true, message: '必填项'},
                                     ]
                                 })(
-                                    <Select {...waterFactorySelect} disabled={type === 'view'}>
-                                        {waterFactoryList.map(item => (
-                                            <Option value={item.name} key={item.name}>{item.name}</Option>
-                                        ))}
-                                    </Select>
+                                    <DatePicker {...dateProps} disabled={type === 'view'}/>
                                 )}
                             </FormItem>
                         </Col>
+                        {/* 安装位置rrrrrr */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="安装位置">
                                 {getFieldDecorator('structuresId', {
@@ -218,72 +233,7 @@ export default class BaseInfo extends React.Component {
                         </Col>
                     </Row>
                     <Row>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="所属设备">
-                                {getFieldDecorator('parentName', {
-                                    initialValue: detail.parentName
-                                })(
-                                    type === 'view' ?
-                                        <Input disabled/>
-                                        :
-                                        <VtxCombogrid {...equipmentSelect}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="设备级别">
-                                {getFieldDecorator('grade', {
-                                    initialValue: detail.grade,
-                                    rules: [
-                                        {required: true, message: '必填项'},
-                                    ]
-                                })(
-                                    <Select style={{width: '100%'}} disabled={type === 'view'}>
-                                        {equipmentGrades.map(item => (
-                                            <Option value={item.value} key={item.value}>{item.text}</Option>
-                                        ))}
-                                    </Select>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="购买时间">
-                                {getFieldDecorator('buyDate', {
-                                    initialValue: !!detail.buyDate ? moment(detail.buyDate) : null,
-                                    rules: [
-                                        {required: true, message: '必填项'},
-                                    ]
-                                })(
-                                    <DatePicker {...dateProps} disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="安装时间">
-                                {getFieldDecorator('installDate', {
-                                    initialValue: !!detail.installDate ? moment(detail.installDate) : null,
-                                    rules: [
-                                        {required: true, message: '必填项'},
-                                    ]
-                                })(
-                                    <DatePicker {...dateProps} disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="投运时间">
-                                {getFieldDecorator('operationDate', {
-                                    initialValue: !!detail.operationDate ? moment(detail.operationDate) : null,
-                                    rules: [
-                                        {required: true, message: '必填项'},
-                                    ]
-                                })(
-                                    <DatePicker {...dateProps} disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
+                        {/* 生产厂家rrrrrr */}
                         <Col span={7}>
                             <FormItem {...formStyle_8} label="生产厂家">
                                 {getFieldDecorator('manufacturer', {
@@ -300,83 +250,26 @@ export default class BaseInfo extends React.Component {
                                 )}
                             </FormItem>
                         </Col>
-                    </Row>
-                    <Row>
+                        {/* 含税总价 */}
                         <Col span={7}>
-                            <FormItem {...formStyle_8} label="遥控设备">
-                                {getFieldDecorator('isRemote', {
-                                    initialValue: detail.isRemote,
+                            <FormItem {...formStyle_8} label="含税总价">
+                                {getFieldDecorator('totalPrice', {
+                                    initialValue: detail.totalPrice,
                                     rules: [
-                                        {required: true, message: '必填项'},
-                                    ]
-                                })(
-                                    <RadioGroup disabled={type === 'view'}>
-                                        <Radio value={1}>是</Radio>
-                                        <Radio value={0}>否</Radio>
-                                    </RadioGroup>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="物料编码">
-                                {getFieldDecorator('materialName', {
-                                    initialValue: detail.materialName,
-                                    rules: [
-                                        {required: true, whitespace: true, message: '必填项'}
+                                        {required: false, whitespace: true, message: '必填项'},
                                     ]
                                 })(
                                     <Input disabled={type === 'view'}/>
                                 )}
                             </FormItem>
                         </Col>
+                        {/* 资产编码 */}
                         <Col span={7}>
-                            <FormItem {...formStyle_8} label="重量(千克)">
-                                {getFieldDecorator('weight', {
-                                    initialValue: detail.weight
-                                })(
-                                    <InputNumber style={{width: '100%'}} min={0.01} precision={2} step={0.01}
-                                                 disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="尺寸">
-                                {getFieldDecorator('dimension', {
-                                    initialValue: detail.dimension
-                                })(
-                                    <Input disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="购买价格">
-                                {getFieldDecorator('price', {
-                                    initialValue: detail.price
-                                })(
-                                    <InputNumber style={{width: '100%'}} min={0.01} precision={2} step={0.01}
-                                                 disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="设计寿命(年)">
-                                {getFieldDecorator('lifeTime', {
-                                    initialValue: detail.lifeTime
-                                })(
-                                    <InputNumber style={{width: '100%'}} min={1} step={0.1} disabled={type === 'view'}/>
-                                )}
-                            </FormItem>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col span={7}>
-                            <FormItem {...formStyle_8} label="厂家联系方式">
-                                {getFieldDecorator('manufacturerContact', {
-                                    initialValue: detail.manufacturerContact,
+                            <FormItem {...formStyle_8} label="资产编码">
+                                {getFieldDecorator('assetCode', {
+                                    initialValue: detail.assetCode,
                                     rules: [
-                                        {pattern: new RegExp(PositiveInteger || emptyInput, "g"), message: '联系方式必须为纯数字'}
+                                        {required: true, whitespace: true, message: '必填项'},
                                     ]
                                 })(
                                     <Input disabled={type === 'view'}/>
@@ -385,7 +278,7 @@ export default class BaseInfo extends React.Component {
                         </Col>
                     </Row>
                 </div>
-                <div className="baseInfoPic" style={{top: type === 'view' ? '130px' : '92px'}}>
+                {/* <div className="baseInfoPic" style={{top: type === 'view' ? '130px' : '92px'}}>
                     {getFieldDecorator('picIds', {
                             initialValue: detail.picIds
                         }
@@ -402,7 +295,7 @@ export default class BaseInfo extends React.Component {
                                 :
                                 <VtxUpload {...imgProps}/>
                     )}
-                </div>
+                </div> */}
             </div>
         );
     };

@@ -14,13 +14,14 @@ import EditItem from '../../components/targetLibrary/Add';
 import ViewItem from '../../components/targetLibrary/View';
 import styles from './index.less';
 import { handleColumns } from '../../utils/tools';
+import MyTree from '../../components/targetLibrary/myTree'
 
 function TargetLibrary({ dispatch, targetLibrary, accessControlM }) {
     const {
         searchParams,
         businessSelect, typeSelect, smallTypeSelect,categorySelect, unitSelect,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys,
-        newItem, editItem, viewItem
+        newItem, editItem, viewItem, treeDatas, isToggle
     } = targetLibrary;
     let buttonLimit = {};
     if (accessControlM['targetLibrary'.toLowerCase()]) {
@@ -393,48 +394,76 @@ function TargetLibrary({ dispatch, targetLibrary, accessControlM }) {
         });
     }
 
+    // ------------切换树和表
+    const toggleTree = () => {
+        updateState({
+            isToggle: !isToggle
+        })
+    }
+
     return (
-        <div className="main_page">
-            <VtxGrid
-                titles={['名称', '编码', '指标大类', '指标小类', '业务范围']}
-                gridweight={[1, 1, 1, 1, 1]}
-                confirm={vtxGridParams.query}
-                clear={vtxGridParams.clear}
-            >
-                <Input {...vtxGridParams.nameProps} />
-                <Input {...vtxGridParams.codeProps} />
-                <Select {...vtxGridParams.typeIdProps}>
-                    {typeSelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
-                    })}
-                </Select>
-                <Select {...vtxGridParams.smallTypeIdProps}>
-                    {smallTypeSelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
-                    })}
-                </Select>
-                <Select {...vtxGridParams.businessIdProps}>
-                    {businessSelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
-                    })}
-                </Select>
-            </VtxGrid>
-            <div className="table-wrapper">
+        <div className={styles.normal}>
+            <div style={{display: 'flex', height: '100%'}}>
+                {/* 树 */}
+                {!isToggle&&<div className={styles.treeContainer}>
+                    <MyTree dataSource={treeDatas} updateState={updateState} getList={getList}/>
+                    <div className={styles.swap} style={{right: '-20px'}} onClick={toggleTree}>
+                        <Icon type="swap" />
+                    </div>
+                </div>}
                 
-                <div className="handle_box">
-                    {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
-                    {buttonLimit['DELETE'] &&<Button icon="delete" disabled={selectedRowKeys.length == 0} onClick={deleteItems}>删除</Button>}
+            <div style={{width: '82%'}} className={styles.normal}>
+                <VtxGrid
+                    titles={['名称', '编码', '指标大类', '指标小类', '业务范围']}
+                    gridweight={[1, 1, 1, 1, 1]}
+                    confirm={vtxGridParams.query}
+                    clear={vtxGridParams.clear}
+                >
+                    <Input {...vtxGridParams.nameProps} />
+                    <Input {...vtxGridParams.codeProps} />
+                    {/* <Select {...vtxGridParams.typeIdProps}>
+                        {typeSelect.map(item => {
+                            return <Option key={item.id}>{item.name}</Option>
+                        })}
+                    </Select>
+                    <Select {...vtxGridParams.smallTypeIdProps}>
+                        {smallTypeSelect.map(item => {
+                            return <Option key={item.id}>{item.name}</Option>
+                        })}
+                    </Select> */}
+                    <Select {...vtxGridParams.businessIdProps}>
+                        {businessSelect.map(item => {
+                            return <Option key={item.id}>{item.name}</Option>
+                        })}
+                    </Select>
+                </VtxGrid>
+                <div className={styles.normal_body}>
+                    
+                    <div className={styles.buttonContainer}>
+                        {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
+                        {buttonLimit['DELETE'] &&<Button icon="delete" disabled={selectedRowKeys.length == 0} onClick={deleteItems}>删除</Button>}
+                    </div>
+                    <div style={{height: "calc(100% - 88px)"}} className={styles.tableContainer}>
+                        <VtxDatagrid {...vtxDatagridProps} />
+                    </div>
                 </div>
-                <div className="table-content">
-                    <VtxDatagrid {...vtxDatagridProps} />
-                </div>
+                {/*新增*/}
+                {newItem.visible && <NewItem {...newItemProps} />}
+                {/*编辑*/}
+                {editItem.visible && <EditItem {...editItemProps} />}
+                {/*查看*/}
+                {viewItem.visible && <ViewItem {...viewItemProps} />}
             </div>
-            {/*新增*/}
-            {newItem.visible && <NewItem {...newItemProps} />}
-            {/*编辑*/}
-            {editItem.visible && <EditItem {...editItemProps} />}
-            {/*查看*/}
-            {viewItem.visible && <ViewItem {...viewItemProps} />}
+
+            {/* 树 */}
+            {isToggle&&<div className={styles.treeContainer}>
+                <MyTree dataSource={treeDatas} updateState={updateState} getList={getList}/>
+                <div className={styles.swap} style={{left: '-20px'}} onClick={toggleTree}>
+                    <Icon type="swap" />
+                </div>
+            </div>}
+            
+            </div>
         </div>
     )
 }

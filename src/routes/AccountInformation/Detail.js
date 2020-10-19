@@ -15,15 +15,33 @@ const {VtxUpload2} = VtxUpload;
 class Detail extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            pasteContent: {}
+        };
     };
     
     getForm = () => {
         return this.props.form;
     };
+
+    // 复制
+    handleCopy=()=>{
+        const copyContent = this.props.form.getFieldsValue()
+        this.props.handleDispatch({ type: 'accountInformationM/copy', payload: copyContent })
+    }
+
+    // 粘贴
+    handlePaste=()=>{
+        const {copyContent} = this.props
+        this.setState({
+            pasteContent: copyContent
+        })
+    }
     
     componentDidMount() {
-    
+        // this.setState({
+        //     pasteContent: {}
+        // })
     }
     
     render() {
@@ -37,7 +55,7 @@ class Detail extends React.Component {
             getFieldValue,
             setFields,
             type,
-            detail,
+            detail: JSON.stringify(this.state.pasteContent) === '{}'? detail : {...detail, ...this.state.pasteContent},
             checkName,
             equipmentStatus,
             equipmentTypes,
@@ -95,8 +113,8 @@ class Detail extends React.Component {
         };
         //文件上传
         const fileProps = {
-            action: "/cloudFile/common/uploadFile",
-            downLoadURL: '/cloudFile/common/downloadFile?id=',
+            action: `/cloudFile/common/uploadFile`,
+            downLoadURL: `/cloudFile/common/downloadFile?id=`,
             multiple: false,
             listType: "text",
             viewMode: type === 'view',
@@ -294,7 +312,32 @@ class Detail extends React.Component {
                 showTotal: total => `合计 ${total} 条`
             }
         };
-        
+        // 上传文件信息
+        const fileTableProps = {
+            pagination: false,
+            columns: [{
+                title: '文档名称',
+                dataIndex: 'docName',
+                key: 'docName',
+                nowrap: true
+            },{
+                title: '操作',
+                dataIndex: 'opt',
+                key: 'opt',
+                render: (text, rowData) => (
+                    <span>
+                        <Icon type='view' title='查看' onClick={() => {}}/>
+                        <Icon type='delete' title='删除' onClick={() => {}}/>
+                    </span>
+                )
+            },],
+            dataSource: [
+                {
+                    docName: '文件一'
+                }
+            ]
+        }
+
         return (
             <Form className="main_page">
                 {type === 'view' ?
@@ -314,27 +357,31 @@ class Detail extends React.Component {
                                     <Panel header="技术文档" key="4" disabled>
                                         {type === 'view' && !detail.fileIds ?
                                             <span style={{marginLeft: '20px'}}>暂无</span> :
-                                            <VtxUpload2 {...fileProps}/>}
+                                            // <VtxUpload2 {...fileProps}/>
+                                            <VtxDatagrid {...fileTableProps}></VtxDatagrid>
+                                        }
+                                            <div style={{width: '500px', margin: '10px 0'}}>
+                                    </div>
                                     </Panel>
                                 </Collapse>
                             </TabPane>
-                            <TabPane tab="维修信息" key="repair" className='repair'>
+                            <TabPane tab="日常养护" key="repair" className='repair'>
                                 <div style={{height: '400px'}}>
                                     <VtxDatagrid {...repairTableProps} />
                                 </div>
                             </TabPane>
-                            <TabPane tab="养护信息" key="maintain">
+                            {/* <TabPane tab="养护信息" key="maintain">
                                 <div style={{height: '400px'}}>
                                     <VtxDatagrid {...maintainTableProps} />
                                 </div>
-                            </TabPane>
+                            </TabPane> */}
                         </Tabs>
                     </div>
                     :
                     <div className="baseInfo">
                         <Collapse defaultActiveKey={['1', '2', '3', '4']}>
                             <Panel header="基本信息" key="1" disabled>
-                                <BaseInfo {...baseInfoProps}/>
+                                <BaseInfo {...baseInfoProps} handleCopy={this.handleCopy} handlePaste={this.handlePaste}/>
                             </Panel>
                             <Panel header="备品备件" key="2" disabled>
                                 <SpareParts {...sparePartsProps}/>

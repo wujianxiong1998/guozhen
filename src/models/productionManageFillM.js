@@ -105,7 +105,7 @@ export default {
         *loadWaterFactorySelect({ payload }, { call, put, select }) {
             yield put({ type: 'updateState', payload: { loading: true } });
             const { data } = yield call(loadWaterFactorySelect,{
-                isControlPermission:'1'
+                isControlPermission:'0'
             });
             yield put({ type: 'updateState', payload: { loading: false } });
             if(!!data && !data.result) {
@@ -224,7 +224,7 @@ export default {
             const { dataStatus, dataType, waterFactoryId} = payload
             const { newItem, editItem } = yield select( ({productionManageFill}) => productionManageFill );
             const {
-                id, dateValue,fillData
+                id, dateValue,fillData,abnormalReason
             } = payload.btnType === 'add' ? newItem : editItem;
             if(payload.btnType==='add'){
                 const { data: checkData } = yield call(ifExistProductionManageFill,{
@@ -236,6 +236,7 @@ export default {
                         id, dateValue, dataStatus, dataType,
                         dataFillDetailJson: JSON.stringify(fillData),
                         waterFactoryId,
+                        abnormalReason,
                         tenantId: VtxUtil.getUrlParam('tenantId')
                     };
                     const { data } = yield call(saveProductionManageFill, VtxUtil.submitTrim(params));

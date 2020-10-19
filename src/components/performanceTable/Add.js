@@ -120,10 +120,10 @@ class ADD extends React.Component {
                             },
                             regexp : {
                                 value : projectName,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
+                        addonAfter={'公里'}
                         disabled={isDisabled}
                         defaultValue={rainwaterPipeline}
                         value={rainwaterPipeline}
@@ -138,7 +138,7 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '雨水管网(公里)',
+                                name: '雨水管网',
                                 width: '40',
                                 key: 'rainwaterPipeline'
                             },
@@ -148,6 +148,7 @@ class ADD extends React.Component {
                             }
                         }}/>
                     <Input
+                        addonAfter={'公里'}
                         disabled={isDisabled}
                         defaultValue={sewagePipeline}
                         value={sewagePipeline}
@@ -162,7 +163,7 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '污水管网(公里)',
+                                name: '污水管网',
                                 width: '40',
                                 key: 'sewagePipeline'
                             },
@@ -172,6 +173,7 @@ class ADD extends React.Component {
                             }
                         }}/>
                     <Input
+                        addonAfter={'公里'}
                         disabled={isDisabled}
                         defaultValue={middleWaterPipeline}
                         value={middleWaterPipeline}
@@ -186,7 +188,7 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '中水管网(公里)',
+                                name: '中水管网',
                                 width: '40',
                                 key: 'middleWaterPipeline'
                             },
@@ -196,6 +198,7 @@ class ADD extends React.Component {
                             }
                         }}/>
                     <Input
+                        addonAfter={'公里'}
                         disabled={isDisabled}
                         defaultValue={waterSupplyPipeline}
                         value={waterSupplyPipeline}
@@ -209,7 +212,7 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '给水管网(公里)',
+                                name: '给水管网',
                                 width: '40',
                                 key: 'waterSupplyPipeline'
                             },
@@ -219,6 +222,7 @@ class ADD extends React.Component {
                             }
                         }}/>
                     <Input
+                        addonAfter={'座'}
                         disabled={isDisabled}
                         defaultValue={rainWaterPump}
                         value={rainWaterPump}
@@ -233,16 +237,17 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '雨水泵站(座)',
+                                name: '雨水泵站',
                                 width: '40',
                                 key: 'rainWaterPump'
                             },
                             regexp : {
                                 value : rainWaterPump,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                                exp: (val) => { if (/(^[1-9]\d*$)/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
+                        addonAfter={'座'}
                         disabled={isDisabled}
                         defaultValue={sewagePump}
                         value={sewagePump}
@@ -257,16 +262,17 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '污水泵站(座)',
+                                name: '污水泵站',
                                 width: '40',
                                 key: 'sewagePump'
                             },
                             regexp : {
                                 value : sewagePump,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
+                                exp: (val) => { if (/(^[1-9]\d*$)/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
+                        addonAfter={'万元/年'}
                         disabled={isDisabled}
                         defaultValue={pipeNet}
                         value={pipeNet}
@@ -281,7 +287,7 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '管网(万元/年)',
+                                name: '管网',
                                 width: '40',
                                 key: 'pipeNet'
                             },
@@ -428,7 +434,6 @@ class ADD extends React.Component {
                         },
                         regexp : {
                             value : projectName,
-                            exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                         }
                     }}/>
                 <Select
@@ -514,6 +519,7 @@ class ADD extends React.Component {
                     <Select.Option key={'2'} value={'dx'}>调蓄</Select.Option>
                 </Select>
                 <Input
+                    addonAfter={'万元/日'}
                     disabled={isDisabled}
                     defaultValue={designScale}
                     value={designScale}
@@ -528,7 +534,7 @@ class ADD extends React.Component {
                         layout:{
                             comType: 'input',
                             require: false,
-                            name: '设计规模(万元/日)',
+                            name: '设计规模',
                             width: '40',
                             key: 'designScale'
                         },
@@ -538,6 +544,7 @@ class ADD extends React.Component {
                         }
                     }}/>
                 <Input
+                    addonAfter={'万吨/日'}
                     disabled={isDisabled}
                     defaultValue={bottomWater}
                     value={bottomWater}
@@ -552,7 +559,7 @@ class ADD extends React.Component {
                         layout:{
                             comType: 'input',
                             require: false,
-                            name: '保底水量(万吨/日)',
+                            name: '保底水量',
                             width: '40',
                             key: 'bottomWater'
                         },
@@ -720,7 +727,6 @@ class ADD extends React.Component {
                         },
                         regexp : {
                             value : chargingModel,
-                            exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                         }
                     }}/>
                 <Input
@@ -768,7 +774,6 @@ class ADD extends React.Component {
                         },
                         regexp : {
                             value : designProcess,
-                            exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                         }
                     }}/>
                 <Input
@@ -792,7 +797,6 @@ class ADD extends React.Component {
                         },
                         regexp : {
                             value : address,
-                            exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                         }
                     }}/>
             </VtxModalList>

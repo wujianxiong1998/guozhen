@@ -115,7 +115,8 @@ export default {
             size: 10,
             list: [],
             listTotal: 0
-        }
+        },
+        copyContent: {}
     },
     
     effects: {
@@ -570,6 +571,12 @@ export default {
                     ...state.technicalParameterParams,
                     ...payload
                 }
+            }
+        },
+        copy(state, {payload}) {
+            return {
+                ...state,
+                copyContent: payload
             }
         }
     }

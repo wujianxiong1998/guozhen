@@ -18,6 +18,7 @@ import NewItem from '../../components/sewageManagement/Add';
 import EditItem from '../../components/sewageManagement/Add';
 import ViewItem from '../../components/sewageManagement/View';
 import ChartItem from '../../components/sewageManagement/Chart';
+import UpdateItem from '../../components/sewageManagement/Update';
 import styles from './index.less';
 import { handleColumns, VtxTimeUtil } from '../../utils/tools';
 import {VtxUtil} from '../../utils/util'
@@ -25,7 +26,7 @@ import {VtxUtil} from '../../utils/util'
 function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     const {
         searchParams, isAdministrator,
-        sewageManagementSelect,queryParams,
+        sewageManagementSelect,queryParams,updateItem,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys, selectedRows,
         newItem, editItem, viewItem, title, importError, showUploadModal, chartItem,regionalCompanySelect, waterFactorySelect
     } = sewageManagement;
@@ -45,10 +46,8 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     const canDelete=()=>{
         let disabled = false
         for(let i=0;i<selectedRows.length;i++){
-            
             const  dataStatus = selectedRows[i]['状态']
             if (dataStatus === '新建' || (isAdministrator && (dataStatus === '待审核' || dataStatus === '待修改' || dataStatus === '通过'))){
-
             }else{
                 disabled = true
                 break
@@ -65,7 +64,7 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
     // 查询
     const vtxGridParams = {
          // 事业部
-         waterFactoryIdProps: {
+        waterFactoryIdProps: {
             value: searchParams.waterFactoryId,
             placeholder: "请选择事业部",
             onChange(value) {
@@ -262,16 +261,17 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         ['主要污染物排放浓度限值', 'limitConcentrationVolume'],
         ['年度污染物排放限值', 'yearLimitVolume'],
         ['排污许可证发证日期', 'startDate'],
-        ['排污许可证有效期', 'endDate'], 
-        ['排污许可备注', 'permitRemark'], 
-        ['环境影响评价报告', 'envReport'], 
+        ['排污许可证有效期', 'endDate'],
+        ['排污许可备注', 'permitRemark'],
+        ['环境影响评价报告', 'envReport'],
         ['环境自行监测方案', 'envScheme'],
-        ['突发环境应急预案', 'contingencyPlan'], 
-        ['备注', 'remark'], 
+        ['突发环境应急预案', 'contingencyPlan'],
+        ['备注', 'remark'],
         ['排污许可证状态', 'state']
     ]
     columns = columns.concat(opt)
-    
+    let modalTitle = searchParams.dataFillType==='produce'?'排污许可证 > 上传':'排污量填报 > 上传'
+
     let columnsss = [
         {
             title: '区域',
@@ -413,6 +413,54 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         }
     })
 
+    //----------------上传------------------
+    const updateFile = (status = true) => {
+        updateState({
+            updateItem: {
+                visible: status
+            }
+        })
+        // if (!status) {
+        //     dispatch({ type: 'performanceTable/initUpdateItem' });
+        // }
+    }
+    const updateItemProps = {
+        updateWindow: updateFile,
+        modalProps: {
+            title: `${modalTitle}`,
+            visible: updateItem.visible,
+            onCancel: () => updateFileWindow(false),
+            width: 900,
+            minHeight: 500
+        },
+        contentProps: {
+            ...updateItem,
+            dataType:searchParams.dataFillType,
+            btnType: 'update',
+            updateItem(obj) {
+                updateState({
+                    updateItem: {
+                        ...obj
+                    }
+                })
+            },
+            save(dataStatus) {
+                dispatch({
+                    type: 'performanceTable/updateFile', payload: {
+                        btnType: 'update',
+                        dataType: searchParams.dataFillType,
+                        onSuccess: function () {
+                            message.success('上传成功');
+                            updateEditWindow(false);
+                        },
+                        onError: function () {
+                            message.error('上传失败');
+                        }
+                    }
+                })
+            }
+        }
+    };
     //----------------新增------------------
     const updateNewWindow = (status = true) => {
         updateState({
@@ -583,6 +631,14 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
             }
         })
     }
+    //--------------上传-----------------
+    const updateFileWindow = (status = true) => {
+        updateState({
+            updateItem: {
+                visible: status
+            }
+        })
+    }
     const viewItemProps = {
         updateWindow: updateViewWindow,
         modalProps: {
@@ -685,13 +741,52 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
         });
     }
     const exportProps = {
-        downloadURL: '/cloud/gzzhsw/api/cp/data/fill/exportDataExcel',
+        downloadURL: '/cloud/gzzhsw/api/cp/water/sewageDischargePermission/exportExcel',
         getExportParams(exportType) {
+            // exportProps.c()
+            // console.log(columns,1111,columnsss)
+            // return
+
+            // console.log(columns,444)
+            // console.log(columns,1111,columnsss)
+            // return
+            // const columns = searchParams.dataFillType==='produce'?handleColumns(columns):columnsss
+            let columns = [
+                [ '区域', 'regionalCompanyName' ],
+                [ '公司名称', 'waterFactoryName'],
+                [ '证书编号', 'permissionCode' ],
+                [ '组织机构代码', 'orgCode' ],
+                ['法定代表人', 'legalRepresentative'],
+                ['发证单位', 'issueUnit'],
+                ['主要污染物种类及限排污染物名称', 'mainContaminant'],
+                ['排放方式', 'emissionsWay'],
+                ['排放口数量(座)', 'dischargeOutletNum'],
+                ['排放口分布情况', 'dischargeOutletDistribution'],
+                ['设计规模', 'scale' ],
+                ['执行的污染物排放标准', 'exeStandard'],
+                ['主要污染物排放浓度限值', 'limitConcentrationVolume'],
+                ['年度污染物排放限值', 'yearLimitVolume'],
+                ['排污许可证发证日期', 'startDate'],
+                ['排污许可证有效期', 'endDate'],
+                ['排污许可备注', 'permitRemark'],
+                ['环境影响评价报告', 'envReport'],
+                ['环境自行监测方案', 'envScheme'],
+                ['突发环境应急预案', 'contingencyPlan'],
+                ['备注', 'remark'],
+                ['排污许可证状态', 'state']
+            ]
+            columns = searchParams.dataFillType==='produce'?handleColumns(columns).map(v=>({title: v.title,field: v.dataIndex})):columnsss.map(v => {
+                if (v.children) {
+                    return v.children.map(v => ({title: v.title,field: v.dataIndex}))
+                }
+                return {title: v.title,field: v.dataIndex}
+            }).flat()
             const param = {
                 regionalCompanyId: '',
                 waterFactoryId: '',
                 tenantId: VtxUtil.getUrlParam('tenantId'),
-            };
+                columnJson: columns
+            }
             switch (exportType) {
                 case 'rows':
                     if (selectedRowKeys.length === 0) {
@@ -720,30 +815,46 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
                     param.isAll = true;
             }
             return param
-        }
+        },
+        // c: function() {console.log(728,columnn,columnsss)}
     }
+    const searchDom = searchParams.dataFillType==='produce'?<VtxGrid
+                        titles={['区域', '公司']}
+                        gridweight={[1, 1]}
+                        confirm={vtxGridParams.query}
+                        clear={vtxGridParams.clear}
+                      >
+                        <Select {...vtxGridParams.regionalCompanyIdProps}>
+                            {regionalCompanySelect.map(item => {
+                                return <Select.Option key={item.id}>{item.name}</Select.Option>
+                            })}
+                        </Select>
+                        <Select {...vtxGridParams.waterFactoryIdProps}>
+                            {waterFactorySelect.map(i => {
+                                return <Select.Option key={i.id}>{i.name}</Select.Option>
+                            })}
+                        </Select>
+                     </VtxGrid>:<VtxGrid
+                                    titles={['区域', '公司', '时间快速选择']}
+                                    gridweight={[1, 1, 2]}
+                                    confirm={vtxGridParams.query}
+                                    clear={vtxGridParams.clear}
+                                >
+                     <Select {...vtxGridParams.regionalCompanyIdProps}>
+                         {regionalCompanySelect.map(item => {
+                             return <Select.Option key={item.id}>{item.name}</Select.Option>
+                         })}
+                     </Select>
+                     <Select {...vtxGridParams.waterFactoryIdProps}>
+                         {waterFactorySelect.map(i => {
+                             return <Select.Option key={i.id}>{i.name}</Select.Option>
+                         })}
+                     </Select>
+                     <VtxRangePicker {...vtxGridParams.startDateProps}/>
+                  </VtxGrid>
     return (
         <div className={styles.normal}>
-            <VtxGrid
-                titles={searchParams.dataFillType==='produce'?['区域', '公司']:['区域', '公司', '时间快速选择']}
-                gridweight={searchParams.dataFillType==='produce'?[1, 1]:[1, 1, 2]}
-                confirm={vtxGridParams.query}
-                clear={vtxGridParams.clear}
-            >
-                <Select {...vtxGridParams.regionalCompanyIdProps}>
-                    {regionalCompanySelect.map(item => {
-                        return <Select.Option key={item.id}>{item.name}</Select.Option>
-                    })}
-                </Select>
-                <Select {...vtxGridParams.waterFactoryIdProps}>
-                    {waterFactorySelect.map(i => {
-                        return <Select.Option key={i.id}>{i.name}</Select.Option>
-                    })}
-                </Select>
-                {searchParams.dataFillType==='assay'?
-                    <VtxRangePicker {...vtxGridParams.startDateProps}/>:''
-                }
-            </VtxGrid>
+           {searchDom}
             <div className={styles.normal_body}>
                 
                 <div className={styles.tabContainer}>
@@ -762,10 +873,14 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
                 <div className={styles.buttonContainer}>
                     {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
                     {buttonLimit['DELETE'] && <Button icon="delete" onClick={deleteItems}>删除</Button>}
-                    <Button icon='download' onClick={() => { window.open(`/cloud/gzzhsw/api/cp/data/fill/exportExcel?sewageManagementId=${searchParams.sewageManagementId}&dataFillType=${searchParams.dataFillType}&tenantId=${VtxUtil.getUrlParam('tenantId')}`) }}>模版下载</Button>
-                    {buttonLimit['EXPORT'] &&<VtxExport2  {...exportProps}>
+                    {/* <Button icon='download' onClick={() => { window.open(`/cloud/gzzhsw/api/cp/data/fill/exportExcel?sewageManagementId=${searchParams.sewageManagementId}&dataFillType=${searchParams.dataFillType}&tenantId=${VtxUtil.getUrlParam('tenantId')}`) }}>模版下载</Button> */}
+                    <Button icon='download' onClick={() => {
+                        window.open(`http://103.14.132.101:9391/cloudFile/common/downloadFile?id=fe79d4ad20354d08a11a58688249d7c5`)
+                    }}>模版下载</Button>
+                    {buttonLimit['EXPORT']&&<Button icon="upload" onClick={() => updateFile()}>上传</Button>}
+                    {buttonLimit['EXPORT'] && <VtxExport mode='simple'  {...exportProps}>
                         <Button icon="export">导出</Button>
-                    </VtxExport2>}
+                    </VtxExport>}
                 </div>
                 <div className={styles.tableContainer}>
                     <VtxDatagrid {...vtxDatagridProps} />
@@ -779,6 +894,8 @@ function SewageManagement({ dispatch, sewageManagement, accessControlM }) {
             {viewItem.visible && <ViewItem {...viewItemProps} />}
             {/*图表 */}
             {chartItem.visible && <ChartItem {...chartItemProps} />}
+            {/*图表 */}
+            {updateItem.visible && <UpdateItem {...updateItemProps} />}
         </div>
     )
 }

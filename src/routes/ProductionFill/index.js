@@ -8,6 +8,7 @@ import { connect } from 'dva';
 
 import { VtxDatagrid, VtxGrid, VtxDate, VtxImport } from 'vtx-ui';
 import { Modal, Button, message, Input, Select } from 'antd';
+const { TextArea } = Input
 const Option = Select.Option;
 const VtxDatePicker = VtxDate.VtxDatePicker;
 

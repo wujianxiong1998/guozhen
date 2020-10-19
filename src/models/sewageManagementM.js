@@ -46,6 +46,9 @@ const initState = {
     viewItem: { // 查看参数
         visible:false
     },
+    updateItem: {
+        visible: false
+    },
     chartItem:{
         name:'',//指标名称
         unit:'',//单位

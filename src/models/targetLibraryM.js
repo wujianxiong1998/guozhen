@@ -1,5 +1,5 @@
 import { getTargetLibraryList,addTargetLibrary,updateTargetLibrary,commonDelete,
-    loadEnum, loadCommonParamSelect } from '../services/remoteData';
+    loadEnum, loadCommonParamSelect, getTargetLibraryTree } from '../services/remoteData';
 
 const u = require('updeep');
 import { VtxUtil,deleteMessage } from '../utils/util';
@@ -48,7 +48,9 @@ const initState = {
     },
     viewItem: { // 查看参数
         visible:false
-    }
+    },
+    treeDatas: {}, //树
+    isToggle: false
 };
 
 export default {
@@ -68,6 +70,8 @@ export default {
                             ...initState
                         }
                     })
+                    // 获取树
+                    dispatch({ type: 'getTree'})
                     // 请求业务范围下拉数据
                     dispatch({type : 'loadBusinessSelect'});
                     // 请求指标类型下拉数据
@@ -84,6 +88,20 @@ export default {
     },
 
     effects : {
+        // 树
+        *getTree({payload}, {call, put, select}) {
+            const {data} = yield call(getTargetLibraryTree);
+            // if(!!data && !data.result) {
+            //     if('data' in data) {
+                    yield put({
+                        type: 'updateState',
+                        payload: {
+                            treeDatas: data.data
+                        }
+                    })
+                // }
+            // }
+        },
         // 业务范围下拉
         *loadBusinessSelect({ payload }, { call, put, select }) {
             const { data } = yield call(loadCommonParamSelect,{

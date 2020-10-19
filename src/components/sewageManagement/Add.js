@@ -146,12 +146,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '排污许可证',
-                                width: '33',
+                                width: '40',
                                 key: 'permission'
                             },
                             regexp : {
                                 value : permission,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -170,12 +169,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '证书编号',
-                                width: '33',
+                                width: '40',
                                 key: 'permissionCode'
                             },
                             regexp : {
                                 value : permissionCode,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -194,12 +192,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '组织机构代码',
-                                width: '33',
+                                width: '40',
                                 key: 'orgCode'
                             },
                             regexp : {
                                 value : orgCode,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -218,12 +215,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '法定代表人',
-                                width: '33',
+                                width: '40',
                                 key: 'legalRepresentative'
                             },
                             regexp : {
                                 value : legalRepresentative,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -242,12 +238,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '发证单位',
-                                width: '33',
+                                width: '40',
                                 key: 'issueUnit'
                             },
                             regexp : {
                                 value : issueUnit,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -266,12 +261,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '主要污染物种类及限排污染物名称',
-                                width: '33',
+                                width: '40',
                                 key: 'mainContaminant'
                             },
                             regexp : {
                                 value : mainContaminant,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -290,16 +284,16 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '排放方式',
-                                width: '33',
+                                width: '40',
                                 key: 'emissionsWay'
                             },
                             regexp : {
                                 value : emissionsWay,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
                         disabled={isDisabled}
+                        addonAfter={'座'}
                         defaultValue={dischargeOutletNum}
                         value={dischargeOutletNum}
                         onChange={(e) => {
@@ -313,8 +307,8 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '排放口数量(座)',
-                                width: '33',
+                                name: '排放口数量',
+                                width: '40',
                                 key: 'dischargeOutletNum'
                             },
                             regexp : {
@@ -338,12 +332,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '排放口分布情况',
-                                width: '33',
+                                width: '40',
                                 key: 'dischargeOutletDistribution'
                             },
                             regexp : {
                                 value : dischargeOutletDistribution,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -362,12 +355,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '设计规模',
-                                width: '33',
+                                width: '40',
                                 key: 'scale'
                             },
                             regexp : {
                                 value : scale,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -386,12 +378,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '执行的污染物排放标准',
-                                width: '33',
+                                width: '40',
                                 key: 'exeStandard'
                             },
                             regexp : {
                                 value : exeStandard,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -410,12 +401,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '主要污染物排放浓度限值',
-                                width: '33',
+                                width: '40',
                                 key: 'limitConcentrationVolume'
                             },
                             regexp : {
                                 value : limitConcentrationVolume,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -435,12 +425,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '年度污染物排放限值',
-                                width: '33',
+                                width: '40',
                                 key: 'yearLimitVolume'
                             },
                             regexp : {
                                 value : yearLimitVolume,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <VtxDatePicker
@@ -540,7 +529,7 @@ class ADD extends React.Component {
                                 comType: '',
                                 require: false,
                                 name: '环境影响评价报告',
-                                width: '33',
+                                width: '40',
                                 key: 'envReport'
                             },
                         }}
@@ -561,7 +550,7 @@ class ADD extends React.Component {
                                 comType: '',
                                 require: false,
                                 name: '环境自行监测方案',
-                                width: '33',
+                                width: '40',
                                 key: 'envScheme'
                             },
                         }}
@@ -582,7 +571,7 @@ class ADD extends React.Component {
                                 comType: '',
                                 require: false,
                                 name: '突发环境应急预案',
-                                width: '33',
+                                width: '40',
                                 key: 'contingencyPlan'
                             },
                         }}
@@ -637,12 +626,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '登录名',
-                                width: '33',
+                                width: '40',
                                 key: 'username'
                             },
                             regexp : {
                                 value : username,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <div
@@ -651,12 +639,11 @@ class ADD extends React.Component {
                                 comType: 'password',
                                 require: false,
                                 name: '登录密码',
-                                width: '33',
+                                width: '40',
                                 key: 'password'
                             },
                             regexp : {
                                 value : password,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}>
                         <input
@@ -786,12 +773,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '主要污染物种类',
-                                width: '33',
+                                width: '40',
                                 key: 'mainContaminant'
                             },
                             regexp : {
                                 value : mainContaminant,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -810,12 +796,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '排污物名称',
-                                width: '33',
+                                width: '40',
                                 key: 'name'
                             },
                             regexp : {
                                 value : name,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -834,12 +819,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '设计规模',
-                                width: '33',
+                                width: '40',
                                 key: 'scale'
                             },
                             regexp : {
                                 value : scale,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
 
@@ -859,12 +843,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '执行的污染物排放标准',
-                                width: '33',
+                                width: '40',
                                 key: 'exeStandard'
                             },
                             regexp : {
                                 value : exeStandard,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                     <Input
@@ -883,12 +866,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '主要污染物排放浓度限量',
-                                width: '33',
+                                width: '40',
                                 key: 'limitConcentrationVolume'
                             },
                             regexp : {
                                 value : limitConcentrationVolume,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
 
@@ -908,16 +890,16 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: '年度排污物排放值',
-                                width: '33',
+                                width: '40',
                                 key: 'yearLimitVolume'
                             },
                             regexp : {
                                 value : yearLimitVolume,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
 
                     <Input
+                        addonAfter={'万吨'}
                         disabled={isDisabled}
                         defaultValue={waterVolume}
                         value={waterVolume}
@@ -932,8 +914,8 @@ class ADD extends React.Component {
                             layout:{
                                 comType: 'input',
                                 require: false,
-                                name: '排放水量(万吨)',
-                                width: '33',
+                                name: '排放水量',
+                                width: '40',
                                 key: 'waterVolume'
                             },
                             regexp : {
@@ -964,12 +946,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: 'COD',
-                                width: '33',
+                                width: '40',
                                 key: 'concentrationCod'
                             },
                             regexp : {
                                 value : concentrationCod,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                         <Input
@@ -988,12 +969,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: 'NH3-N',
-                                width: '33',
+                                width: '40',
                                 key: 'concentrationNh3n'
                             },
                             regexp : {
                                 value : concentrationNh3n,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                         <Input
@@ -1012,12 +992,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: 'TN',
-                                width: '33',
+                                width: '40',
                                 key: 'concentrationTn'
                             },
                             regexp : {
                                 value : concentrationTn,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                         <Input
@@ -1036,12 +1015,11 @@ class ADD extends React.Component {
                                 comType: 'input',
                                 require: false,
                                 name: 'TP',
-                                width: '33',
+                                width: '40',
                                 key: 'concentrationTp'
                             },
                             regexp : {
                                 value : concentrationTp,
-                                exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                             }
                         }}/>
                         </VtxModalList>
@@ -1066,12 +1044,11 @@ class ADD extends React.Component {
                                     comType: 'input',
                                     require: false,
                                     name: 'COD',
-                                    width: '33',
+                                    width: '40',
                                     key: 'pollutionCod'
                                 },
                                 regexp : {
                                     value : pollutionCod,
-                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                 }
                             }}/>
                             <Input
@@ -1090,12 +1067,11 @@ class ADD extends React.Component {
                                     comType: 'input',
                                     require: false,
                                     name: 'NH3-N',
-                                    width: '33',
+                                    width: '40',
                                     key: 'pollutionNh3n'
                                 },
                                 regexp : {
                                     value : pollutionNh3n,
-                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                 }
                             }}/>
                             <Input
@@ -1114,12 +1090,11 @@ class ADD extends React.Component {
                                     comType: 'input',
                                     require: false,
                                     name: 'TN',
-                                    width: '33',
+                                    width: '40',
                                     key: 'pollutionTn'
                                 },
                                 regexp : {
                                     value : pollutionTn,
-                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                 }
                             }}/>
                             <Input
@@ -1138,12 +1113,11 @@ class ADD extends React.Component {
                                     comType: 'input',
                                     require: false,
                                     name: 'TP',
-                                    width: '33',
+                                    width: '40',
                                     key: 'pollutionTp'
                                 },
                                 regexp : {
                                     value : pollutionTp,
-                                    exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                 }
                             }}/>
                     </VtxModalList>

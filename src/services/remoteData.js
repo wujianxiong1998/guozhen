@@ -344,7 +344,6 @@ export async function updateSewage(param) {
 
 // 历史查询
 export async function getFactoryHistory(param) {
-    console.log(param)
     return request('/cloud/gzzhsw/api/cp/water/factoryHistory/page', {
         method: 'get',
         body: param,
@@ -352,6 +351,14 @@ export async function getFactoryHistory(param) {
 }
 
 //=========================================指标库=================================================
+// 获取树
+export async function getTargetLibraryTree(param) {
+    return request('/cloud/gzzhsw/api/cp/target/library/tree.smvc', {
+        method: 'GET',
+        body: param
+    })
+}
+
 //分页
 export async function getTargetLibraryList(param) {
     return request('/cloud/gzzhsw/api/cp/target/library/page.smvc', {
@@ -410,6 +417,14 @@ export async function getTargetLibrarySelect(param) {
 }
 
 //====================================指标配置=====================================
+// 获取树
+export async function getTargetConfigTree(param) {
+    return request('/cloud/gzzhsw/api/cp/water/factory/tree.smvc', {
+        method: 'GET',
+        body: param
+    })
+}
+
 //查询指标模版列表
 export async function getTargetTemplateSelect(param) {
     return request('/cloud/gzzhsw/api/cp/target/template/list.smvc', {
@@ -498,4 +513,26 @@ export function exportFiles(postData) {
     return request('/vortex/rest/cloud/np/file/downloadBatch', {
         body: postData
     });
+}
+
+// -----------------------------------信息稽查
+// 分页
+export function getOnlineOperation(param) {
+    return request('', {
+        method: 'get',
+        body: param
+    })
+}
+// 删除
+export function deleteOnlineOperation(param, searchParams) {
+    if(searchParams.dataFillType==='produce') {
+        return request('', {
+            method: 'post',
+            body: { ids: param.ids }
+        })
+    }
+    return request('', {
+        method: 'post',
+        body: { ids: param.ids }
+    })
 }

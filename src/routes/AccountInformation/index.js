@@ -2,10 +2,13 @@ import React from 'react';
 import {connect} from 'dva';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
-import {VtxDatagrid, VtxGrid} from "vtx-ui";
+import {VtxDatagrid, VtxGrid, VtxExport} from "vtx-ui";
+const { VtxExport2 } = VtxExport;
 import {Input, Button, Modal, message, Select, Icon} from "antd";
 import Detail from './Detail';
 import {delPopconfirm} from "../../utils/util";
+import {VtxUtil} from '../../utils/util';
+import UpdateItem from '../../components/accountInformation/Update'
 
 moment.locale('zh-cn');
 const Option = Select.Option;
@@ -17,15 +20,14 @@ class AccountInformation extends React.Component {
     };
     
     componentDidMount() {
-    
     }
     
     render() {
         const {dispatch, accountInformationM, accessControlM, loading, submitLoading, sparePartsLoading, repairListLoading, maintainListLoading} = this.props;
-        const {waterFactoryList, equipmentStatus, equipmentTypes, gridParams, searchParams, dataList, dataTotal, delIds, modalParams, structureList, equipmentGrades, manufacturerList, equipmentSelectList, equipmentSelectTotal, sparePartsParams, technicalParameterParams, detailRepair, maintainRepair} = accountInformationM;
+        const {waterFactoryList, equipmentStatus, equipmentTypes, gridParams, searchParams, dataList, dataTotal, delIds, modalParams, structureList, equipmentGrades, manufacturerList, equipmentSelectList, equipmentSelectTotal, sparePartsParams, technicalParameterParams, detailRepair, maintainRepair, copyContent} = accountInformationM;
         const {waterFactoryName, deviceStatus, code, name} = gridParams;
         const {page, size} = searchParams;
-        const {type, visible, title, detail} = modalParams;
+        const {type, visible, title, detail, isUpdate} = modalParams;
         
         let buttonLimit = {};
         if (accessControlM['accountInfo'.toLowerCase()]) {
@@ -205,6 +207,10 @@ class AccountInformation extends React.Component {
         };
         //新增或编辑
         const handle = (type) => {
+            if(type==='update') {
+                closeModal()
+                return
+            }
             const childForm = this.modalForm.getForm();
             childForm.validateFieldsAndScroll((err, values) => {
                 if (err) {
@@ -248,6 +254,9 @@ class AccountInformation extends React.Component {
                     manufacturerList: []
                 }
             });
+            if(type==='update') {
+                return   
+            }
             this.modalForm.getForm().resetFields();
         };
         //更改模态框相关配置
@@ -269,6 +278,7 @@ class AccountInformation extends React.Component {
         };
         //模态框内容配置
         const detailProps = {
+            copyContent,
             waterFactoryList,
             detail,
             type,
@@ -387,7 +397,54 @@ class AccountInformation extends React.Component {
             maintainRepair,
             maintainListLoading
         };
-        
+        // 导出
+        const exportProps = {
+            downloadURL: '/cloud/gzzhsw/api/cp/device/exportDataExcel',
+            getExportParams(exportType) {
+                const param = {
+                    tenantId: VtxUtil.getUrlParam('tenantId'),
+                };
+                switch (exportType) {
+                    case 'rows':
+                        if (delIds.length === 0) {
+                            message.info('需要选择一项进行导出');
+                            return;
+                        }
+                        param.isAll = false;
+                        param.ids = delIds.join();
+                        break;
+                    case 'page':
+                        if (dataList.length === 0) {
+                            message.info('当前页没有数据');
+                            return;
+                        }
+                        const ids = dataList.map((item, index) => {
+                            return item.id;
+                        });
+                        param.isAll = false;
+                        param.ids = ids.join();
+                        break;
+                    case 'all':
+                        if (dataTotal === 0) {
+                            message.info('暂无数据可进行导出');
+                            return;
+                        }
+                        param.isAll = true;
+                }
+                return param
+            }
+        }
+        // 导入
+        const updateItemProps = {
+            modalProps: {
+                title: `台账信息 > 上传`,
+                visible: true,
+                onCancel: () => updateModalParams('type', ''),
+                width: 900,
+                minHeight: 500
+            }
+        };
+        const fileId = '32f60426b4a04bbea8fa424957ffbb28'
         return (
             <div className="main_page">
                 <VtxGrid titles={['水厂名称', '设备编号', '设备名称', '设备状态']}
@@ -437,12 +494,12 @@ class AccountInformation extends React.Component {
                 </VtxGrid>
                 <div className="table-wrapper">
                     <div className="handle_box">
-                        {buttonLimit['ADD'] && <Button icon="file-add"
-                                                       onClick={() => {
+                        {buttonLimit['ADD'] && <Button icon="file-add" onClick={() => {
                                                            updateModalParams('type', 'add');
                                                            updateModalParams('visible', true);
                                                            updateModalParams('title', '台账管理>新增');
                                                        }}>新增</Button>}
+
                         {buttonLimit['DELETE'] && <Button icon="delete"
                                                           disabled={delIds.length === 0}
                                                           onClick={() => {
@@ -455,6 +512,11 @@ class AccountInformation extends React.Component {
                                                                   })
                                                               })
                                                           }}>删除</Button>}
+                        
+                        <Button icon='download' onClick={() => { window.open(`http://103.14.132.101:9391/cloudFile/common/downloadFile?id=${fileId}`) }}>模版下载</Button>
+                        <Button icon="upload" onClick={() => {updateModalParams('type', 'update')}}>上传</Button>
+                        <VtxExport2  {...exportProps}><Button icon="export">导出</Button></VtxExport2>
+
                     </div>
                     <div className='table-content'>
                         <VtxDatagrid {...tableProps} />
@@ -469,8 +531,10 @@ class AccountInformation extends React.Component {
                                                  onClick={() => handle(type)}>保存</Button>
                                      ] : null}
                 >
-                    <Detail {...detailProps}/>
+                    <Detail {...detailProps} handleDispatch={dispatch}/>
                 </Modal>}
+                {/*上传 */}
+                {type==='update' && <UpdateItem {...updateItemProps} />}
             </div>
         );
     };

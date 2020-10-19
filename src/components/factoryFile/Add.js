@@ -2,7 +2,7 @@ import React from 'react';
 
 import { VtxModal, VtxModalList, VtxDate, VtxUpload } from 'vtx-ui';
 const { VtxDatePicker,VtxRangePicker } = VtxDate;
-import { Button, Input, Select,InputNumber } from 'antd';
+import { Button, Input, Select,InputNumber,Upload,Icon, message } from 'antd';
 import {VtxUtil} from '../../utils/util';
 import styles from './index.less';
 import PublicModal from '../../components/publicModal/index'
@@ -36,6 +36,36 @@ class ADD extends React.Component {
             }>保存</Button>
         ]
     }
+    // 上传
+    handleChange = (name, info) => {
+        // ('科研及批复', 'research')
+        // ('环评及批复', 'envAssessment')
+        // ('环保验收资料', 'acceptance')
+        const { updateItem } = this.props.contentProps
+        if (info.file.status !== 'uploading') {
+          console.log(info.file, info.fileList);
+          if(info.file.status === 'done') {
+                switch(name) {
+                    case 'research':
+                        updateItem({
+                            research: info.file.name
+                        });break;
+                    case 'envAssessment':
+                        updateItem({
+                            envAssessment: info.file.name
+                        });break;
+                    case 'acceptance':
+                        updateItem({
+                            acceptance: info.file.name
+                        });break;
+                }
+            
+          }
+        }
+        if(info.file.response) {
+            info.file.response.result===1?message.error(info.file.response.msg):message.success(info.file.response.msg)
+        }
+    }
 
     render() {
         const { dispatch, modalProps, contentProps } = this.props;
@@ -52,54 +82,15 @@ class ADD extends React.Component {
         const searchHistory = () => {
             this.setState({ historyModalVisible: true })
         }
-        
-        let uploadProps = (name,fieldCode,photoIds,require)=>{
-            return {
-                action:"/cloudFile/common/uploadFile",
-                downLoadURL:'/cloudFile/common/downloadFile?id=',
-                "data-modallist":{
-                    layout:{
-                        width:100,
-                        name,
-                        // require
-                    },
-                    regexp:{
-                        value:photoIds
-                    }
-                },
-                multiple: false,
-                viewMode: true,
-                listType:"text",
-                mode:'multiple',
-                onSuccess(file){
-                    photoIds.push({id: file.id, name: file.name});
-                    updateItem({[fieldCode]: photoIds})
-                },
-                onRemove(file){
-                    let ph = photoIds.filter(item => item.id !== file.id);
-                    updateItem({[fieldCode]: ph})
-                },
-                fileList:photoIds?photoIds:[],
-                // accept:'image/png, image/jpeg, image/jpg',
-                fileListVersion,
-            }
-        }
-        // const fileProps = {
-        //     fileList: !!detail.fileIds ? JSON.parse(detail.fileIds) : [],
-        //     onSuccess: (file) => {
-        //         let result = !!detail.fileIds ? JSON.parse(detail.fileIds) : [];
-        //         result.push({id: file.id, name: file.name});
-        //         changeDetail('fileIds', JSON.stringify(result))
-        //     },
-        //     onRemove: (file) => {
-        //         let result = !!detail.fileIds ? JSON.parse(detail.fileIds) : [];
-        //         changeDetail('fileIds', JSON.stringify(result.map(item => {
-        //             if (item.id !== file.id) {
-        //                 return item
-        //             }
-        //         }).filter(item => !!item)))
-        //     },
-        // };
+        const updateProps = {
+            name: 'file',
+            accept: '.xls',
+            action: '/cloud/gzzhsw/api/cp/basic/0neFactoryOneGear/importExcel'+'?tenantId='+VtxUtil.getUrlParam('tenantId'),
+            headers: {
+              authorization: 'authorization-text',
+            },
+            
+          };
         return (
             <div>
                 <VtxModal
@@ -202,20 +193,57 @@ class ADD extends React.Component {
                                     return <Option unitId={item.parentId} key={item.id}>{item.name}</Option>
                                 })}
                             </Select>
-
-                            {/* second part */}
+                        {/* second part */}
                             <PublicModal title={'前期资料'}></PublicModal>
-                            <VtxUpload
-                                {...uploadProps('科研及批复', 'research', research)}
-                            />
-                            <VtxUpload
-                                {...uploadProps('环评及批复', 'envAssessment', envAssessment)}
-                            />
-                            <VtxUpload
-                                {...uploadProps('环保验收资料', 'acceptance', acceptance)}
-                            />
+                            <div 
+                                data-modallist={{
+                                    layout: {
+                                        name: '科研及批复',
+                                        require: false,
+                                        width: '100',
+                                    }
+                            }}>
+                                <Upload {...updateProps} onChange={this.handleChange.bind(this, 'research')}>
+                                    <Button>
+                                    <Icon type="upload" /> 上传
+                                    </Button>
+                                </Upload>
+                            </div>
 
-                            {/* third part */}
+                            <div 
+                                data-modallist={{
+                                    layout: {
+                                        name: '环评及批复',
+                                        require: false,
+                                        width: '100',
+                                    }
+                            }}>
+                                <Upload {...updateProps} onChange={this.handleChange.bind(this, 'envAssessment')}>
+                                    <Button>
+                                    <Icon type="upload" /> 上传
+                                    </Button>
+                                </Upload>
+                            </div>
+
+                            <div 
+                                data-modallist={{
+                                    layout: {
+                                        name: '环保验收资料',
+                                        require: false,
+                                        width: '100',
+                                    }
+                            }}>
+                                <Upload {...updateProps} onChange={this.handleChange.bind(this, 'acceptance')}>
+                                    <Button>
+                                    <Icon type="upload" /> 上传
+                                    </Button>
+                                </Upload>
+                            </div>
+                            {/* <VtxUpload
+                                {...uploadProps('科研及批复', 'research', research)}
+                            />*/}
+
+                        {/* third part */}
                             <PublicModal title={'基本情况'}></PublicModal>
                             <Input
                                 value={investment}
@@ -236,7 +264,7 @@ class ADD extends React.Component {
                                     },
                                     regexp : {
                                         value : investment,
-                                        
+                                        exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                     }
                                 }}
                             />
@@ -259,7 +287,6 @@ class ADD extends React.Component {
                                     },
                                     regexp : {
                                         value : designUnit,
-                                        exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                     }
                                 }}/>
                             <Input
@@ -281,7 +308,6 @@ class ADD extends React.Component {
                                     },
                                     regexp : {
                                         value : constructionUnit,
-                                        exp: (val) => { if (/^(([1-9]\d*)|0)(\.\d{0,2}?)?$/.test(val)) { return true } else { return false } }
                                     }
                                 }}/>
                             <VtxRangePicker

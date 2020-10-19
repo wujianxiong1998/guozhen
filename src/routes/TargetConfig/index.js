@@ -19,12 +19,14 @@ import ViewItem from '../../components/targetConfig/View';
 import { handleColumns } from '../../utils/tools';
 import styles from './index.less';
 
+import MyTree from '../../components/targetConfig/myTree'
+
 function TargetConfig({ dispatch, targetConfig, accessControlM }) {
     const {
         searchParams,
         businessUnitSelect, regionalCompanySelect, waterFactorySelect, templateSelect,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys,
-        newItem, editItem, viewItem
+        newItem, editItem, viewItem, treeDatas, isToggle
     } = targetConfig;
     let buttonLimit = {};
     if (accessControlM['targetConfig'.toLowerCase()]) {
@@ -44,29 +46,27 @@ function TargetConfig({ dispatch, targetConfig, accessControlM }) {
             }
         })
     }
-
     // 更新表格数据
     const getList = () => {
         dispatch({ type: 'targetConfig/updateQueryParams' });
         dispatch({ type: 'targetConfig/getList' });
     }
-
     // 查询
     const vtxGridParams = {
         // 名称
         waterFactoryNameProps: {
-            value: searchParams.name,
+            value: searchParams.businessName,
             onChange(e) {
                 updateState({
                     searchParams: {
-                        name: e.target.value
+                        businessName: e.target.value
                     }
                 })
             },
             onPressEnter() {
                 getList();
             },
-            placeholder: '请输入名称',
+            placeholder: '请输入业务范围',
             maxLength: '32'
         },
 
@@ -418,72 +418,86 @@ function TargetConfig({ dispatch, targetConfig, accessControlM }) {
         });
     }
 
+    // ------------切换树和表
+    const toggleTree = () => {
+        updateState({
+            isToggle: !isToggle
+        })
+    }
     return (
         <div className={styles.normal}>
-            <VtxGrid
-                titles={['水厂名称', '事业部', '区域公司']}
-                gridweight={[1, 1, 1]}
-                confirm={vtxGridParams.query}
-                clear={vtxGridParams.clear}
-            >
-                <Input {...vtxGridParams.waterFactoryNameProps} />
-                <Select {...vtxGridParams.businessUnitIdProps}>
-                    {businessUnitSelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
-                    })}
-                </Select>
-                <Select {...vtxGridParams.regionalCompanyIdProps}>
-                    {regionalCompanySelect.map(item => {
-                        return <Option key={item.id}>{item.name}</Option>
-                    })}
-                </Select>
-            </VtxGrid>
-            <div className={styles.normal_body}>
-           
-                <div className={styles.tabContainer}>
-                    <Tabs activeKey={searchParams.typeCode == 'JHZB' ? 'JHZB' : 'TBZB'} onChange={(key) => {
-                        updateState({
-                            searchParams: {
-                                typeCode: key === 'JHZB' ?'JHZB':'SCZB'
-                            }
-                        })
-                        getList();
-                    }}>
-                        <TabPane tab='计划指标' key='JHZB' />
-                        <TabPane tab='填报指标' key='TBZB' />
-                    </Tabs>
+            <div style={{display: 'flex', height: '100%'}}>
+                {/* 树 */}
+                {!isToggle&&<div className={styles.treeContainer}>
+                    <MyTree dataSource={treeDatas} updateState={updateState} getList={getList}/>
+                    <div className={styles.swap} style={{right: '-20px'}} onClick={toggleTree}>
+                        <Icon type="swap" />
+                    </div>
+                </div>}
+
+                {/* 表格 */}
+                <div style={{width: '82%'}} className={styles.normal}>
+                    <VtxGrid titles={['业务范围']} gridweight={[1]}
+                            confirm={vtxGridParams.query}
+                            clear={vtxGridParams.clear}>
+                        <Input {...vtxGridParams.waterFactoryNameProps} />
+                    </VtxGrid>
+                    <div className={styles.normal_body}>
+                
+                        <div className={styles.tabContainer}>
+                            <Tabs activeKey={searchParams.typeCode == 'JHZB' ? 'JHZB' : 'TBZB'} onChange={(key) => {
+                                updateState({
+                                    searchParams: {
+                                        typeCode: key === 'JHZB' ?'JHZB':'SCZB'
+                                    }
+                                })
+                                getList();
+                            }}>
+                                <TabPane tab='计划指标' key='JHZB' />
+                                <TabPane tab='填报指标' key='TBZB' />
+                            </Tabs>
+                        </div>
+                        {
+                            searchParams.typeCode !=='JHZB'?
+                                <Tabs activeKey={searchParams.typeCode} onChange={(key) => {
+                                    updateState({
+                                        searchParams: {
+                                            typeCode: key
+                                        }
+                                    })
+                                    getList();
+                                }}>
+                                    <TabPane tab='生产指标' key='SCZB' />
+                                    <TabPane tab='化验指标' key='HYZB' />
+                                    <TabPane tab='单耗指标' key='DHZB' />
+                                </Tabs>
+                            :''
+                        }
+                    {/*按钮*/}
+                        <div className={styles.buttonContainer}>
+                            {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
+                            {buttonLimit['DELETE'] && <Button icon="delete" disabled={selectedRowKeys.length == 0} onClick={deleteItems}>删除</Button>}
+                        </div>
+                        <div style={{ height: searchParams.typeCode === 'JHZB' ? "calc(100% - 88px)" : "calc(100% - 138px)"}} className={styles.tableContainer}>
+                            <VtxDatagrid {...vtxDatagridProps} />
+                        </div>
+                    </div>
+                    {/*新增*/}
+                    {newItem.visible && <NewItem {...newItemProps} />}
+                    {/*编辑*/}
+                    {editItem.visible && <EditItem {...editItemProps} />}
+                    {/*查看*/}
+                    {viewItem.visible && <ViewItem {...viewItemProps} />}
                 </div>
-                {
-                    searchParams.typeCode !=='JHZB'?
-                        <Tabs activeKey={searchParams.typeCode} onChange={(key) => {
-                            updateState({
-                                searchParams: {
-                                    typeCode: key
-                                }
-                            })
-                            getList();
-                        }}>
-                            <TabPane tab='生产指标' key='SCZB' />
-                            <TabPane tab='化验指标' key='HYZB' />
-                            <TabPane tab='单耗指标' key='DHZB' />
-                        </Tabs>
-                    :''
-                }
-            {/*按钮*/}
-                <div className={styles.buttonContainer}>
-                    {buttonLimit['ADD'] &&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
-                    {buttonLimit['DELETE'] && <Button icon="delete" disabled={selectedRowKeys.length == 0} onClick={deleteItems}>删除</Button>}
-                </div>
-                <div style={{ height: searchParams.typeCode === 'JHZB' ? "calc(100% - 88px)" : "calc(100% - 138px)"}} className={styles.tableContainer}>
-                    <VtxDatagrid {...vtxDatagridProps} />
-                </div>
+
+                {/* 树 */}
+                {isToggle&&<div className={styles.treeContainer}>
+                    <MyTree dataSource={treeDatas} updateState={updateState} getList={getList}/>
+                    <div className={styles.swap} style={{left: '-20px'}} onClick={toggleTree}>
+                        <Icon type="swap" />
+                    </div>
+                </div>}
             </div>
-            {/*新增*/}
-            {newItem.visible && <NewItem {...newItemProps} />}
-            {/*编辑*/}
-            {editItem.visible && <EditItem {...editItemProps} />}
-            {/*查看*/}
-            {viewItem.visible && <ViewItem {...viewItemProps} />}
         </div>
     )
 }

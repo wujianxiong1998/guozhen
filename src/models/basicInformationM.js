@@ -335,7 +335,7 @@ export default {
                 ...action.payload,
                 currentPage : 1,
                 pageSize : 10,
-				 searchParams : initQueryParams,
+				searchParams : initQueryParams,
                 queryParams : initQueryParams
             }
         },

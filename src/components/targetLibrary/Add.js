@@ -40,8 +40,7 @@ class ADD extends React.Component {
             id, name, code, businessId, businessSelect, typeId, smallTypeId, smallTypeSelect, typeSelect, categoryKey,
             categorySelect, unitId, unitSelect, decimalDigits, rationalRange, formula
         } = contentProps;
-        const { updateItem } = contentProps;
-
+        const { updateItem, btnType } = contentProps;
         return (
             <VtxModal
                 {...modalProps}
@@ -92,7 +91,8 @@ class ADD extends React.Component {
                                 code: e.target.value
                             })
                         }}
-                        placeholder="请输入指标编码（必填项）"
+                        disabled={btnType==='add'?true:false}
+                        placeholder="自动生成"
                         maxLength="32"
                         data-modallist={{
                             layout: {
@@ -103,16 +103,7 @@ class ADD extends React.Component {
                                 key: 'code'
                             },
                             regexp: {
-                                value: code,
-                                repete: {
-                                    url: '/cloud/gzzhsw/api/cp/target/library/check.smvc',
-                                    key: {
-                                        tenantId: VtxUtil.getUrlParam('tenantId'),
-                                        id,
-                                        paramCode: 'code',
-                                        paramValue: code
-                                    }
-                                }
+                                value: code
                             }
                         }}
                     />
@@ -148,6 +139,10 @@ class ADD extends React.Component {
                             updateItem({
                                 typeId : value
                             })
+                            
+                            updateItem({
+                                typeName : typeSelect.filter(item=>item.id===value)[0].name
+                            })
                         }}
                         placeholder="请选择指标大类（必选项）"
                         allowClear
@@ -173,6 +168,9 @@ class ADD extends React.Component {
                         onChange={(value) => {
                             updateItem({
                                 smallTypeId: value
+                            })
+                            updateItem({
+                                smallTypeSelect : typeSelect.filter(item=>item.id===value)[0].name
                             })
                         }}
                         placeholder="请选择指标小类（必选项）"

@@ -2,7 +2,14 @@ import React from 'react';
 
 import { VtxModal, VtxModalList, VtxDate, VtxImport } from 'vtx-ui';
 const { VtxDatePicker } = VtxDate;
-import { Button,Table,Input,message, } from 'antd';
+import { Button,Table,Input,message,Form } from 'antd';
+const FormItem = Form.Item;
+const formItemLayout = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 8 }
+}
+
+const { TextArea } = Input;
 import moment from 'moment'
 import FullScreenModal from '../FullScreenModal'
 import { handleColumns, VtxTimeUtil } from '../../utils/tools';
@@ -13,7 +20,9 @@ class ADD extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.state = {};
+		this.state = {
+            validDatas: []
+        };
 	}
 
     modalListRef = ref => this.modalList = ref;
@@ -55,10 +64,40 @@ class ADD extends React.Component {
         ]
     }
 
+
+    // 判断是否超出范围
+    handleChange = (range, value, index) => {
+        if (value===null) return
+        let { validDatas } = this.state
+        if(validDatas.some(item=>item.index===index&&item.value===value)) {
+            return
+        }
+        if(value==='') {
+            validDatas.push({index, isValid: true})
+            return
+        }
+        if(validDatas.some(item=>item.index===index&&item.value!==value)) {
+            validDatas = validDatas.filter(item=>item.index!==index)
+        }
+        if(range) {
+            let rangeData = range.split('-')
+            if(rangeData.length===1) {
+                validDatas.push({index, isValid: rangeData[0]==value, value})
+            } else {
+                validDatas.push({index, isValid: value>=rangeData[0] && value<=rangeData[1], value})
+            }
+        } else {
+            validDatas.push({index, isValid: true, value})
+        }
+        this.setState({
+            validDatas
+        })
+    }
     render() {
+        const { validDatas } = this.state
         const { dispatch, modalProps, contentProps } = this.props;
         const { id, dateValue, fillData, dataType, waterFactoryName, waterFactoryId,importError, showUploadModal, btnType} = contentProps
-        const { updateItem, updateState, getList, calculateTargetValue, calculateConsumeTargetValue } = contentProps;
+        const { updateItem, updateState, getList, calculateTargetValue, calculateConsumeTargetValue,abnormalReason } = contentProps;
         const dataTypeTitles = {
             'produce':'生产数据',
             'assay':'化验数据',
@@ -72,17 +111,31 @@ class ADD extends React.Component {
                 ['范围','rationalRange'],
                 ['值', 'dataValue', { render: (text, record,index) =>{
                     if (record.categoryKey === 'primitiveTarget'){
-                        return <Input value={text}
-                        onBlur={()=>{calculateTargetValue()}}
-                        onChange={(e) => {
-                            updateItem({
-                                fillData: {
-                                    [index]: {
-                                        dataValue: e.target.value
-                                    }
+                        return <div>
+                            <Input  value={text}
+                                    onBlur={()=>{
+                                        calculateTargetValue()
+                                        this.handleChange(fillData[index].rationalRange, fillData[index].dataValue, index)
+                                    }}
+                                    onChange={(e) => {
+                                        updateItem({
+                                            fillData: {
+                                                [index]: {
+                                                    dataValue: e.target.value
+                                                }
+                                            },
+                                        })
+                                    }}
+                            />
+                            {!!validDatas.length&&validDatas.map((item,i)=>{
+                                if(index==item.index && !item.isValid) {
+                                    return <div style={{textAlign: 'left'}}>
+                                        <span style={{color: 'red'}}>超出范围</span>
+                                    </div>
                                 }
-                            })
-                        }} />
+                            })}
+                            
+                        </div>
                     }else{
                         return text
                     }}
@@ -156,7 +209,8 @@ class ADD extends React.Component {
                                             }
                                         }
                                     })
-                                }} />
+                                }} 
+                                />
                         } else {
                             return text
                         }
@@ -291,6 +345,34 @@ class ADD extends React.Component {
                         pagination={false}
                         rowKey={record => record.id}
                     />
+                    <div style={{marginTop: '20px', boxSizing: 'border-box', padding: '0 40px'}}>
+                        {validDatas.every(item=>item.isValid===true)&&<TextArea
+                            value={abnormalReason}
+                            rows={3}
+                            onChange={(e) => {
+                                if(!validDatas.every(item=>item.isValid===true)) {
+                                    updateItem({
+                                        abnormalReason : ''
+                                    })
+                                    return
+                                }
+                                updateItem({
+                                    abnormalReason : e.target.value
+                                })
+                            }}
+                            placeholder="请输入异常原因"
+                            data-modallist={{
+                                layout:{
+                                    comType: 'input',
+                                    require: false,
+                                    name: '问题描述',
+                                    width: '100',
+                                    maxNum: 500,
+                                    key: abnormalReason
+                                }
+                            }}
+                        />}
+                    </div>
                 </div>
                 <VtxImport {...importProps}>{importError}</VtxImport>
             </FullScreenModal>

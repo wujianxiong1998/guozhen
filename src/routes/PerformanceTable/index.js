@@ -6,7 +6,7 @@
 import React from 'react';
 import { connect } from 'dva';
 
-import { VtxDatagrid, VtxGrid, VtxDate, VtxExport } from 'vtx-ui';
+import { VtxDatagrid, VtxGrid, VtxDate, VtxExport, VtxImport } from 'vtx-ui';
 const { VtxMonthPicker, VtxRangePicker } = VtxDate;
 const { VtxExport2 } = VtxExport;
 import { Modal, Button, message, Select,Tabs,Icon,Input } from 'antd';
@@ -17,7 +17,7 @@ import moment from 'moment';
 import NewItem from '../../components/performanceTable/Add';
 import EditItem from '../../components/performanceTable/Add';
 import ViewItem from '../../components/performanceTable/View';
-import ChartItem from '../../components/performanceTable/Chart';
+import UpdateItem from '../../components/performanceTable/Update';
 import styles from './index.less';
 import { handleColumns, VtxTimeUtil } from '../../utils/tools';
 import {VtxUtil} from '../../utils/util'
@@ -27,7 +27,7 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
         searchParams, isAdministrator,
         performanceTableSelect,queryParams,
         currentPage, pageSize, loading, dataSource, total, selectedRowKeys, selectedRows,
-        newItem, editItem, viewItem, title, importError, showUploadModal, chartItem,regionalCompanySelect, waterFactorySelect
+        updateItem, newItem, editItem, viewItem, title, importError, showUploadModal, chartItem,regionalCompanySelect, waterFactorySelect
     } = performanceTable;
     let buttonLimit = {};
     if (accessControlM['ProductionManageFill'.toLowerCase()]) {
@@ -605,20 +605,6 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             }
         }
     })
-
-    //----------------新增------------------
-    const updateNewWindow = (status = true) => {
-        updateState({
-            newItem: {
-                visible: status
-            }
-        })
-        if (!status) {
-            dispatch({ type: 'performanceTable/initNewItem' });
-        }else{
-            dispatch({ type:'performanceTable/getDefaultperformanceTable'})
-        }
-    }
     let modalTitle
     let vtxGridTitle
     let vtxGridWeight
@@ -683,6 +669,70 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                             </VtxGrid>
             break;
     }
+
+    //----------------新增------------------
+    const updateNewWindow = (status = true) => {
+        updateState({
+            newItem: {
+                visible: status
+            }
+        })
+        if (!status) {
+            dispatch({ type: 'performanceTable/initNewItem' });
+        }else{
+            dispatch({ type:'performanceTable/getDefaultperformanceTable'})
+        }
+    }
+    //----------------上传------------------
+    const updateFile = (status = true) => {
+        updateState({
+            updateItem: {
+                visible: status
+            }
+        })
+        // if (!status) {
+        //     dispatch({ type: 'performanceTable/initUpdateItem' });
+        // }
+    }
+    const updateItemProps = {
+        updateWindow: updateFile,
+        modalProps: {
+            title: `${modalTitle} > 上传`,
+            visible: updateItem.visible,
+            onCancel: () => updateFileWindow(false),
+            width: 900,
+            minHeight: 500
+        },
+        contentProps: {
+            ...updateItem,
+            dataType:searchParams.dataFillType,
+            btnType: 'update',
+            updateItem(obj) {
+                updateState({
+                    updateItem: {
+                        ...obj
+                    }
+                })
+            },
+            save(dataStatus) {
+                dispatch({
+                    type: 'performanceTable/updateFile', payload: {
+                        btnType: 'update',
+                        dataType: searchParams.dataFillType,
+                        onSuccess: function () {
+                            message.success('上传成功');
+                            updateEditWindow(false);
+                        },
+                        onError: function () {
+                            message.error('上传失败');
+                        }
+                    }
+                })
+            }
+        }
+    };
+
+    
     const newItemProps = {
         updateWindow: updateNewWindow,
         modalProps: {
@@ -807,6 +857,14 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             }
         })
     }
+    //--------------上传-----------------
+    const updateFileWindow = (status = true) => {
+        updateState({
+            updateItem: {
+                visible: status
+            }
+        })
+    }
     const viewItemProps = {
         updateWindow: updateViewWindow,
         modalProps: {
@@ -888,12 +946,13 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             }
         });
     }
+    let downloadURL = searchParams.dataFillType==='produce'?'/cloud/gzzhsw/api/cp/basic/pipelineNetPerformance/exportDataExcel':'/cloud/gzzhsw/api/cp/basic/sewageFactory/exportDataExcel'
     const exportProps = {
-        downloadURL: '/cloud/gzzhsw/api/cp/data/fill/exportDataExcel',
+        downloadURL,
         getExportParams(exportType) {
             const param = {
                 regionalCompanyId: '',
-                waterFactoryId: '',
+                projectName: '',
                 tenantId: VtxUtil.getUrlParam('tenantId'),
             };
             switch (exportType) {
@@ -926,6 +985,8 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             return param
         }
     }
+    const fileId = searchParams.dataFillType==='produce'?'8390383f8ce8427eb47cb56e2676aee6':'786d67b64594424f89344513e9727e74'
+    
     return (
         <div className={styles.normal}>
             {vtxGridSearch}
@@ -948,7 +1009,8 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
                 <div className={styles.buttonContainer}>
                     {buttonLimit['ADD']&&searchParams.dataFillType!=='third'&&<Button icon="file-add" onClick={() => updateNewWindow()}>新增</Button>}
                     {buttonLimit['DELETE']&&searchParams.dataFillType!=='third'&&<Button icon="delete" onClick={deleteItems}>删除</Button>}
-                    {searchParams.dataFillType!=='third'&&<Button icon='download' onClick={() => { window.open(`/cloud/gzzhsw/api/cp/data/fill/exportExcel?performanceTableId=${searchParams.performanceTableId}&dataFillType=${searchParams.dataFillType}&tenantId=${VtxUtil.getUrlParam('tenantId')}`) }}>模版下载</Button>}
+                    <Button icon='download' onClick={() => { window.open(`http://103.14.132.101:9391/cloudFile/common/downloadFile?id=${fileId}`) }}>模版下载</Button>
+                    {searchParams.dataFillType!=='third'&&buttonLimit['EXPORT']&&<Button icon="upload" onClick={() => updateFile()}>上传</Button>}
                     {buttonLimit['EXPORT'] &&<VtxExport2  {...exportProps}>
                         <Button icon="export">导出</Button>
                     </VtxExport2>}
@@ -963,8 +1025,8 @@ function PerformanceTable({ dispatch, performanceTable, accessControlM }) {
             {editItem.visible && <EditItem {...editItemProps} />}
             {/*查看*/}
             {viewItem.visible && <ViewItem {...viewItemProps} />}
-            {/*图表 */}
-            {chartItem.visible && <ChartItem {...chartItemProps} />}
+            {/*上传 */}
+            {updateItem.visible && <UpdateItem {...updateItemProps} />}
         </div>
     )
 }
